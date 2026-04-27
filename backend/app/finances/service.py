@@ -253,8 +253,8 @@ async def get_financial_summary(user_id: str) -> dict:
     async for doc in db.transactions.aggregate(income_pipeline):
         total_income = doc["total"]
 
-    # Monthly expenses (last 12 months)
-    monthly_pipeline = [
+    # Monthly data (expenses + income, last 12 months)
+    monthly_exp_pipeline = [
         {"$match": {"user_id": user_id, "type": {"$in": ["mantenimiento", "operativo", "mejora"]}}},
         {
             "$group": {
@@ -268,13 +268,36 @@ async def get_financial_summary(user_id: str) -> dict:
         {"$sort": {"_id.year": 1, "_id.month": 1}},
         {"$limit": 12},
     ]
-    monthly_expenses = []
-    async for doc in db.transactions.aggregate(monthly_pipeline):
-        monthly_expenses.append({
-            "year": doc["_id"]["year"],
-            "month": doc["_id"]["month"],
-            "total": round(doc["total"], 2),
-        })
+    monthly_inc_pipeline = [
+        {"$match": {"user_id": user_id, "type": "ingreso"}},
+        {
+            "$group": {
+                "_id": {
+                    "year": {"$year": "$date"},
+                    "month": {"$month": "$date"},
+                },
+                "total": {"$sum": "$amount"},
+            }
+        },
+        {"$sort": {"_id.year": 1, "_id.month": 1}},
+        {"$limit": 12},
+    ]
+
+    # Collect expenses by month
+    monthly_map = {}
+    async for doc in db.transactions.aggregate(monthly_exp_pipeline):
+        key = (doc["_id"]["year"], doc["_id"]["month"])
+        monthly_map[key] = {"year": key[0], "month": key[1], "expenses": round(doc["total"], 2), "income": 0}
+
+    # Merge income by month
+    async for doc in db.transactions.aggregate(monthly_inc_pipeline):
+        key = (doc["_id"]["year"], doc["_id"]["month"])
+        if key in monthly_map:
+            monthly_map[key]["income"] = round(doc["total"], 2)
+        else:
+            monthly_map[key] = {"year": key[0], "month": key[1], "expenses": 0, "income": round(doc["total"], 2)}
+
+    monthly_expenses = [v for k, v in sorted(monthly_map.items())]
 
     # Expenses by category
     category_pipeline = [

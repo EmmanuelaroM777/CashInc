@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import Chatbot from '../UI/Chatbot';
 import { Menu, X } from 'lucide-react';
 
 const Layout = ({ children }) => {
@@ -35,6 +36,9 @@ const Layout = ({ children }) => {
             {children}
           </div>
         </main>
+        
+        {/* Global Floating Chatbot */}
+        <Chatbot />
       </div>
     </div>
   );

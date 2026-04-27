@@ -6,20 +6,25 @@ import {
   CircleDollarSign, 
   BarChart3, 
   Bell, 
-  LogOut 
+  LogOut,
+  Settings,
+  Sparkles
 } from 'lucide-react';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
+import { LanguageContext } from '../../context/LanguageContext';
 
 const Sidebar = ({ onClose }) => {
   const { user, logout } = useContext(AuthContext);
+  const { t } = useContext(LanguageContext);
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Activos', path: '/assets', icon: Building2 },
-    { name: 'Finanzas', path: '/finances', icon: CircleDollarSign },
-    { name: 'Reportes', path: '/reports', icon: BarChart3 },
-    { name: 'Alertas', path: '/alerts', icon: Bell },
+    { name: t('sidebar.dashboard'), path: '/dashboard', icon: LayoutDashboard },
+    { name: t('sidebar.assets'), path: '/assets', icon: Building2 },
+    { name: t('sidebar.finances'), path: '/finances', icon: CircleDollarSign },
+    { name: t('sidebar.reports'), path: '/reports', icon: BarChart3 },
+    { name: t('sidebar.alerts'), path: '/alerts', icon: Bell },
+    { name: t('sidebar.settings'), path: '/settings', icon: Settings },
   ];
 
   return (
@@ -42,15 +47,22 @@ const Sidebar = ({ onClose }) => {
               to={item.path}
               onClick={() => onClose && onClose()}
               className={({ isActive }) => `
-                flex items-center px-4 py-3 rounded-lg transition-all duration-200
+                flex items-center px-4 py-3 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] relative overflow-hidden
                 ${isActive 
-                  ? 'bg-[var(--accent-primary)] bg-opacity-10 text-[var(--accent-primary)] font-medium border border-[var(--accent-primary)] border-opacity-20 shadow-[inset_0_0_10px_rgba(59,130,246,0.1)]' 
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-glass)] hover:text-white border border-transparent'
+                  ? 'text-white font-medium bg-gradient-to-r from-[rgba(59,130,246,0.15)] to-transparent border-l-4 border-[var(--accent-primary)] shadow-[-10px_0_20px_-10px_rgba(59,130,246,0.5)]' 
+                  : 'text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.03)] hover:text-white border-l-4 border-transparent'
                 }
               `}
             >
-              <Icon size={20} className="mr-3" />
-              {item.name}
+              {({ isActive }) => (
+                <>
+                  <Icon size={20} className={`mr-3 transition-colors duration-300 ${isActive ? 'text-[var(--accent-primary)] drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]' : ''}`} />
+                  <span className="relative z-10">{item.name}</span>
+                  {isActive && (
+                    <div className="absolute inset-0 bg-[var(--accent-primary)] opacity-5 blur-xl"></div>
+                  )}
+                </>
+              )}
             </NavLink>
           );
         })}
@@ -70,19 +82,27 @@ const Sidebar = ({ onClose }) => {
         
         {user?.role === 'admin' && user?.company_code && (
           <div className="mb-3 px-4 py-2 bg-[var(--bg-glass)] border border-[var(--accent-primary)] border-opacity-30 rounded-lg text-center">
-            <p className="text-xs text-[var(--text-muted)] mb-1">Código de Empresa</p>
+            <p className="text-xs text-[var(--text-muted)] mb-1">{t('sidebar.companyCode')}</p>
             <p className="text-sm font-mono font-bold tracking-widest text-[var(--accent-primary)] select-all">
               {user.company_code}
             </p>
           </div>
         )}
 
+        <Link 
+          to="/premium"
+          className="flex items-center justify-center w-full px-4 py-2 mb-3 text-sm font-semibold text-white bg-gradient-to-r from-[var(--accent-tertiary)] to-[var(--accent-primary)] hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] rounded-lg transition-all"
+        >
+          <Sparkles size={16} className="mr-2" />
+          {t('sidebar.upgrade')}
+        </Link>
+
         <button 
           onClick={logout}
           className="flex items-center w-full px-4 py-2 text-sm text-[var(--status-danger)] hover:bg-[rgba(239,68,68,0.1)] rounded-lg transition-colors"
         >
           <LogOut size={18} className="mr-3" />
-          Cerrar Sesión
+          {t('sidebar.logout')}
         </button>
       </div>
     </aside>

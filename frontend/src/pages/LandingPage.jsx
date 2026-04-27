@@ -60,10 +60,10 @@ const LandingPage = () => {
             </span>
           </div>
           
-          <nav className="hidden lg:flex gap-8 text-sm font-medium text-gray-300">
-            <a href="#que-es" className="hover:text-white transition-colors">¿Qué es CashInc?</a>
-            <a href="#pymes" className="hover:text-white transition-colors">Las PyMEs</a>
-            <a href="#ventajas" className="hover:text-white transition-colors">Ventajas</a>
+          <nav className="hidden lg:flex gap-2 text-sm font-medium text-gray-300">
+            <a href="#que-es" className="nav-glow-link">¿Qué es CashInc?</a>
+            <a href="#pymes" className="nav-glow-link">Las PyMEs</a>
+            <a href="#ventajas" className="nav-glow-link">Ventajas</a>
           </nav>
 
           <div className="flex gap-2 sm:gap-3 items-center">

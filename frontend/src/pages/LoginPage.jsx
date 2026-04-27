@@ -38,6 +38,26 @@ const LoginPage = () => {
     setLoading(true);
     setError(null);
 
+    // Frontend password validation (registration only)
+    if (!isLogin) {
+      const pwd = formData.password;
+      if (pwd.length < 8) {
+        setError('La contraseña debe tener al menos 8 caracteres');
+        setLoading(false);
+        return;
+      }
+      if (!/[A-Z]/.test(pwd)) {
+        setError('La contraseña debe contener al menos una letra mayúscula');
+        setLoading(false);
+        return;
+      }
+      if (!/[0-9]/.test(pwd)) {
+        setError('La contraseña debe contener al menos un número');
+        setLoading(false);
+        return;
+      }
+    }
+
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
@@ -46,7 +66,13 @@ const LoginPage = () => {
       }
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Error en la autenticación. Por favor intente de nuevo.');
+      const detail = err.response?.data?.detail;
+      // Pydantic validation errors come as an array
+      if (Array.isArray(detail)) {
+        setError(detail.map(d => d.msg).join('. '));
+      } else {
+        setError(detail || 'Error en la autenticación. Por favor intente de nuevo.');
+      }
     } finally {
       setLoading(false);
     }
@@ -108,7 +134,7 @@ const LoginPage = () => {
             />
             
             <Input
-              label="Contraseña"
+              label={isLogin ? "Contraseña" : "Crear Contraseña"}
               name="password"
               type="password"
               value={formData.password}
@@ -116,7 +142,33 @@ const LoginPage = () => {
               icon={Lock}
               placeholder="••••••••"
               required
+              minLength={isLogin ? undefined : 8}
             />
+
+            {/* Password Strength Indicators (only on register) */}
+            {!isLogin && formData.password.length > 0 && (
+              <div className="space-y-1.5 px-1 animate-fade-in">
+                <p className="text-xs text-[var(--text-muted)] mb-1">Requisitos de la contraseña:</p>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${formData.password.length >= 8 ? 'bg-[var(--status-success)] text-white' : 'bg-[rgba(255,255,255,0.1)] text-[var(--text-muted)]'}`}>
+                    {formData.password.length >= 8 ? '✓' : '✗'}
+                  </span>
+                  <span className={formData.password.length >= 8 ? 'text-[var(--status-success)]' : 'text-[var(--text-muted)]'}>Mínimo 8 caracteres</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${/[A-Z]/.test(formData.password) ? 'bg-[var(--status-success)] text-white' : 'bg-[rgba(255,255,255,0.1)] text-[var(--text-muted)]'}`}>
+                    {/[A-Z]/.test(formData.password) ? '✓' : '✗'}
+                  </span>
+                  <span className={/[A-Z]/.test(formData.password) ? 'text-[var(--status-success)]' : 'text-[var(--text-muted)]'}>Al menos una mayúscula (A-Z)</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs">
+                  <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${/[0-9]/.test(formData.password) ? 'bg-[var(--status-success)] text-white' : 'bg-[rgba(255,255,255,0.1)] text-[var(--text-muted)]'}`}>
+                    {/[0-9]/.test(formData.password) ? '✓' : '✗'}
+                  </span>
+                  <span className={/[0-9]/.test(formData.password) ? 'text-[var(--status-success)]' : 'text-[var(--text-muted)]'}>Al menos un número (0-9)</span>
+                </div>
+              </div>
+            )}
 
             {!isLogin && (
               <div className="space-y-1.5 w-full">

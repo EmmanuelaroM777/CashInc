@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Bell, Search, Menu } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Bell, Menu } from 'lucide-react';
+import { useContext } from 'react';
+import { LanguageContext } from '../../context/LanguageContext';
+import GlowSearch from '../UI/GlowSearch';
 import apiClient from '../../api/client';
 
 const Header = ({ onMenuClick }) => {
+  const { t } = useContext(LanguageContext);
   const location = useLocation();
+  const navigate = useNavigate();
   const [alertCount, setAlertCount] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     const fetchAlertCount = async () => {
       try {
+        await apiClient.post('/alerts/check-depreciation'); // Generate alerts if needed
         const response = await apiClient.get('/alerts/count');
         setAlertCount(response.data.count);
       } catch (error) {
@@ -22,13 +29,15 @@ const Header = ({ onMenuClick }) => {
   // Map paths to titles
   const getPageTitle = () => {
     const path = location.pathname;
-    if (path === '/') return 'Dashboard';
-    if (path.startsWith('/assets/')) return 'Detalle de Activo';
-    if (path.startsWith('/assets')) return 'Gestión de Activos';
-    if (path.startsWith('/finances')) return 'Control Financiero';
-    if (path.startsWith('/reports')) return 'Reportes';
-    if (path.startsWith('/alerts')) return 'Centro de Alertas';
-    return 'CashInc';
+    if (path === '/dashboard') return t('header.titleDashboard');
+    if (path.startsWith('/assets/')) return t('header.titleAssets') + ' (Detalle)';
+    if (path.startsWith('/assets')) return t('header.titleAssets');
+    if (path.startsWith('/finances')) return t('header.titleFinances');
+    if (path.startsWith('/reports')) return t('header.titleReports');
+    if (path.startsWith('/alerts')) return t('header.titleAlerts');
+    if (path.startsWith('/settings')) return t('header.titleSettings');
+    if (path.startsWith('/premium')) return 'Premium';
+    return t('header.titleDefault');
   };
 
   return (
@@ -41,20 +50,25 @@ const Header = ({ onMenuClick }) => {
       </div>
 
       <div className="flex items-center space-x-4">
-        {/* Search Bar - hidden on small screens */}
-        <div className="hidden md:flex relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[var(--text-muted)]">
-            <Search size={16} />
-          </div>
-          <input
-            type="text"
-            placeholder="Buscar..."
-            className="w-64 bg-[var(--bg-primary)] border border-[var(--border-light)] text-sm rounded-full pl-10 pr-4 py-1.5 focus:outline-none focus:border-[var(--accent-primary)] focus:ring-1 focus:ring-[var(--accent-primary)] transition-all"
+        {/* Animated Search Bar - hidden on small screens */}
+        <div className="hidden md:block">
+          <GlowSearch
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                navigate(`/assets?search=${searchQuery}`);
+              }
+            }}
+            placeholder={t('header.searchPlaceholder')}
           />
         </div>
 
         {/* Notifications */}
-        <button className="relative p-2 text-[var(--text-secondary)] hover:text-white transition-colors rounded-full hover:bg-[var(--bg-primary)]">
+        <button 
+          onClick={() => navigate('/alerts')}
+          className="relative p-2 text-[var(--text-secondary)] hover:text-white transition-colors rounded-full hover:bg-[var(--bg-primary)]"
+        >
           <Bell size={20} />
           {alertCount > 0 && (
             <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--status-danger)] text-[10px] font-bold text-white shadow-glow animate-pulse">

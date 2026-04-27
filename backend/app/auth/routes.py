@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from app.auth.schemas import UserCreate, UserLogin, UserResponse, Token
+from typing import List
+from app.auth.schemas import UserCreate, UserLogin, UserResponse, Token, UserUpdate, WorkerResponse
 from app.auth.service import (
     register_user,
     authenticate_user,
     create_access_token,
     get_current_user,
+    require_admin,
+    update_user_profile,
+    get_company_workers,
 )
 
 router = APIRouter()
@@ -84,3 +88,26 @@ async def get_me(current_user: dict = Depends(get_current_user)):
         company_code=current_user.get("company_code"),
         admin_id=current_user.get("admin_id"),
     )
+
+@router.put("/me", response_model=UserResponse)
+async def update_me(
+    user_data: UserUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    """Update current user's profile."""
+    updated_user = await update_user_profile(current_user["id"], user_data.model_dump(exclude_unset=True))
+    return UserResponse(
+        id=str(updated_user["_id"]),
+        name=updated_user["name"],
+        email=updated_user["email"],
+        role=updated_user["role"],
+        created_at=updated_user["created_at"],
+        company_code=updated_user.get("company_code"),
+        admin_id=updated_user.get("admin_id"),
+    )
+
+@router.get("/workers", response_model=List[WorkerResponse])
+async def list_workers(current_user: dict = Depends(require_admin)):
+    """List workers associated with the admin's company."""
+    workers = await get_company_workers(current_user["id"])
+    return workers

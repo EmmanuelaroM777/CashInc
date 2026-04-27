@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 import Layout from './components/Layout/Layout';
 import Loader from './components/UI/Loader';
@@ -12,6 +13,8 @@ import AssetDetailPage from './pages/AssetDetailPage';
 import FinancePage from './pages/FinancePage';
 import ReportsPage from './pages/ReportsPage';
 import AlertsPage from './pages/AlertsPage';
+import SettingsPage from './pages/SettingsPage';
+import PremiumPage from './pages/PremiumPage';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -30,8 +33,9 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+      <LanguageProvider>
+        <BrowserRouter>
+          <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           
@@ -41,10 +45,13 @@ function App() {
           <Route path="/finances" element={<ProtectedRoute><FinancePage /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
           <Route path="/alerts" element={<ProtectedRoute><AlertsPage /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
+          <Route path="/premium" element={<ProtectedRoute><PremiumPage /></ProtectedRoute>} />
           
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </BrowserRouter>
+      </LanguageProvider>
     </AuthProvider>
   );
 }

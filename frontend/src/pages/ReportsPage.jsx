@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Download, FileText, FileSpreadsheet } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
 import apiClient from '../api/client';
-import Button from '../components/UI/Button';
 import Input from '../components/UI/Input';
+import DownloadButton from '../components/UI/DownloadButton';
 
 const ReportsPage = () => {
   const [reportType, setReportType] = useState('comparison');
@@ -11,40 +11,28 @@ const ReportsPage = () => {
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async (format) => {
-    setIsExporting(true);
-    try {
-      let url = `/reports/export/${format}?report_type=${reportType}`;
-      if (reportType === 'period') {
-        if (!startDate || !endDate) {
-          alert('Por favor seleccione fechas de inicio y fin');
-          setIsExporting(false);
-          return;
-        }
-        url += `&start_date=${new Date(startDate).toISOString()}&end_date=${new Date(endDate).toISOString()}`;
-      }
-
-      const response = await apiClient.get(url, {
-        responseType: 'blob'
-      });
-
-      // Download file
-      const blob = new Blob([response.data], { 
-        type: format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-      });
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = downloadUrl;
-      const extension = format === 'pdf' ? 'pdf' : 'xlsx';
-      link.setAttribute('download', `infracontrol_reporte_${reportType}_${new Date().toISOString().split('T')[0]}.${extension}`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-    } catch (error) {
-      console.error("Error exporting report", error);
-      alert("Error al generar el reporte");
-    } finally {
-      setIsExporting(false);
+    if (reportType === 'period' && (!startDate || !endDate)) {
+      throw new Error('dates');
     }
+
+    let url = `/reports/export/${format}?report_type=${reportType}`;
+    if (reportType === 'period') {
+      url += `&start_date=${new Date(startDate).toISOString()}&end_date=${new Date(endDate).toISOString()}`;
+    }
+
+    const response = await apiClient.get(url, { responseType: 'blob' });
+
+    const blob = new Blob([response.data], { 
+      type: format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    const extension = format === 'pdf' ? 'pdf' : 'xlsx';
+    link.setAttribute('download', `infracontrol_reporte_${reportType}_${new Date().toISOString().split('T')[0]}.${extension}`);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
   };
 
   return (
@@ -100,24 +88,19 @@ const ReportsPage = () => {
             Descargue el reporte configurado en el formato de su preferencia.
           </p>
           
-          <div className="flex flex-col gap-4">
-            <Button 
-              onClick={() => handleExport('pdf')} 
-              isLoading={isExporting}
-              className="flex items-center justify-center py-4"
-            >
-              <FileText className="mr-2" size={20} />
-              Exportar como PDF
-            </Button>
-            <Button 
-              variant="secondary" 
-              onClick={() => handleExport('excel')} 
-              isLoading={isExporting}
-              className="flex items-center justify-center py-4"
-            >
-              <FileSpreadsheet className="mr-2" size={20} />
-              Exportar como Excel
-            </Button>
+          <div className="flex flex-col gap-5">
+            <DownloadButton
+              label="Exportar como PDF"
+              doneLabel="Descargado"
+              color="#6366f1"
+              onDownload={() => handleExport('pdf')}
+            />
+            <DownloadButton
+              label="Exportar como Excel"
+              doneLabel="Descargado"
+              color="#10b981"
+              onDownload={() => handleExport('excel')}
+            />
           </div>
         </div>
       </div>

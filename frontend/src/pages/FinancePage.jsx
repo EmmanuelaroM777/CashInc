@@ -4,8 +4,8 @@ import { AuthContext } from '../context/AuthContext';
 import apiClient from '../api/client';
 import Button from '../components/UI/Button';
 import Input from '../components/UI/Input';
-import Modal from '../components/UI/Modal';
 import Loader from '../components/UI/Loader';
+import TransactionModal from '../components/UI/TransactionModal';
 
 const FinancePage = () => {
   const { user } = useContext(AuthContext);
@@ -15,15 +15,6 @@ const FinancePage = () => {
   
   // Transaction Modal
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    asset_id: '',
-    type: 'operativo',
-    amount: '',
-    date: new Date().toISOString().split('T')[0],
-    description: '',
-    category: ''
-  });
 
   const fetchData = async () => {
     try {
@@ -34,10 +25,6 @@ const FinancePage = () => {
       ]);
       setTransactions(txRes.data);
       setAssets(assetsRes.data.assets);
-      
-      if (assetsRes.data.assets.length > 0 && !formData.asset_id) {
-        setFormData(prev => ({ ...prev, asset_id: assetsRes.data.assets[0].id }));
-      }
     } catch (error) {
       console.error("Error fetching finance data", error);
     } finally {
@@ -48,45 +35,6 @@ const FinancePage = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.asset_id) {
-      alert("Debe seleccionar un activo");
-      return;
-    }
-
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        ...formData,
-        amount: parseFloat(formData.amount),
-        date: new Date(formData.date).toISOString()
-      };
-      
-      await apiClient.post('/finances/transactions', payload);
-      setIsModalOpen(false);
-      fetchData();
-      
-      setFormData(prev => ({
-        ...prev,
-        amount: '',
-        description: '',
-        category: '',
-        date: new Date().toISOString().split('T')[0]
-      }));
-    } catch (error) {
-      console.error("Error creating transaction", error);
-      alert("Error al registrar transacción");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const formatCurrency = (value) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
 
@@ -178,44 +126,11 @@ const FinancePage = () => {
       </div>
 
       {/* Transaction Modal */}
-      <Modal 
+      <TransactionModal 
         isOpen={isModalOpen} 
-        onClose={() => !isSubmitting && setIsModalOpen(false)}
-        title="Registrar Transacción"
-      >
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1.5 w-full">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">Activo Relacionado</label>
-            <select name="asset_id" value={formData.asset_id} onChange={handleInputChange} required className="w-full bg-[rgba(0,0,0,0.2)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all">
-              {assets.map(a => (
-                <option key={a.id} value={a.id} className="bg-[var(--bg-secondary)]">{a.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5 w-full">
-              <label className="text-sm font-medium text-[var(--text-secondary)]">Tipo</label>
-              <select name="type" value={formData.type} onChange={handleInputChange} required className="w-full bg-[rgba(0,0,0,0.2)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all">
-                <option value="operativo" className="bg-[var(--bg-secondary)]">Gasto Operativo</option>
-                <option value="mantenimiento" className="bg-[var(--bg-secondary)]">Mantenimiento</option>
-                <option value="mejora" className="bg-[var(--bg-secondary)]">Mejora/Inversión</option>
-                <option value="ingreso" className="bg-[var(--bg-secondary)]">Ingreso</option>
-              </select>
-            </div>
-            <Input label="Monto ($)" name="amount" type="number" step="0.01" min="0.01" value={formData.amount} onChange={handleInputChange} required />
-          </div>
-
-          <Input label="Fecha" name="date" type="date" value={formData.date} onChange={handleInputChange} required />
-          <Input label="Categoría (Opcional)" name="category" value={formData.category} onChange={handleInputChange} placeholder="Ej. Electricidad, Pintura..." />
-          <Input label="Descripción (Opcional)" name="description" value={formData.description} onChange={handleInputChange} />
-
-          <div className="flex justify-end space-x-3 pt-4 mt-4 border-t border-[var(--border-light)]">
-            <Button type="button" variant="ghost" onClick={() => setIsModalOpen(false)}>Cancelar</Button>
-            <Button type="submit" isLoading={isSubmitting}>Registrar</Button>
-          </div>
-        </form>
-      </Modal>
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={fetchData} 
+      />
     </div>
   );
 };

@@ -154,3 +154,45 @@ async def authenticate_user(email: str, password: str) -> Optional[dict]:
         return None
 
     return user
+
+async def update_user_profile(user_id: str, update_data: dict) -> dict:
+    """Update user profile."""
+    db = get_database()
+    update_fields = {}
+    if "name" in update_data and update_data["name"]:
+        update_fields["name"] = update_data["name"]
+    if "email" in update_data and update_data["email"]:
+        existing = await db.users.find_one({"email": update_data["email"], "_id": {"$ne": ObjectId(user_id)}})
+        if existing:
+            raise HTTPException(status_code=400, detail="El correo electrónico ya está en uso")
+        update_fields["email"] = update_data["email"]
+    if "password" in update_data and update_data["password"]:
+        update_fields["hashed_password"] = hash_password(update_data["password"])
+    if "language" in update_data and update_data["language"]:
+        update_fields["language"] = update_data["language"]
+
+    if not update_fields:
+        return await db.users.find_one({"_id": ObjectId(user_id)})
+
+    update_fields["updated_at"] = datetime.now(timezone.utc)
+    
+    await db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": update_fields}
+    )
+    return await db.users.find_one({"_id": ObjectId(user_id)})
+
+async def get_company_workers(admin_id: str) -> list:
+    """Get all workers under an admin."""
+    db = get_database()
+    cursor = db.users.find({"admin_id": admin_id, "role": "trabajador"})
+    workers = []
+    async for worker in cursor:
+        workers.append({
+            "id": str(worker["_id"]),
+            "name": worker["name"],
+            "email": worker["email"],
+            "created_at": worker["created_at"],
+        })
+    return workers
+

@@ -6,6 +6,8 @@ import { AuthContext } from '../context/AuthContext';
 import apiClient from '../api/client';
 import Button from '../components/UI/Button';
 import Loader from '../components/UI/Loader';
+import Input from '../components/UI/Input';
+import Modal from '../components/UI/Modal';
 
 const AssetDetailPage = () => {
   const { id } = useParams();
@@ -14,6 +16,64 @@ const AssetDetailPage = () => {
   
   const [asset, setAsset] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '', type: 'edificio', description: '', location: '',
+    useful_life_years: '', salvage_value: '0', status: 'activo'
+  });
+
+  const handleEditClick = () => {
+    setFormData({
+      name: asset.name,
+      type: asset.type,
+      description: asset.description || '',
+      location: asset.location || '',
+      useful_life_years: asset.useful_life_years,
+      salvage_value: asset.salvage_value,
+      status: asset.status
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        ...formData,
+        useful_life_years: parseInt(formData.useful_life_years),
+        salvage_value: parseFloat(formData.salvage_value)
+      };
+      
+      const response = await apiClient.put(`/assets/${id}`, payload);
+      setAsset(response.data);
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error("Error updating asset", error);
+      alert(error.response?.data?.detail || "Error al actualizar activo");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await apiClient.delete(`/assets/${id}`);
+      navigate('/assets');
+    } catch (error) {
+      console.error("Error deleting asset", error);
+      alert(error.response?.data?.detail || "Error al eliminar activo");
+    } finally {
+      setShowDeleteConfirm(false);
+    }
+  };
 
   useEffect(() => {
     const fetchAsset = async () => {
@@ -90,10 +150,10 @@ const AssetDetailPage = () => {
         
         {user?.role === 'admin' && (
           <div className="flex gap-2">
-            <Button variant="secondary" className="flex items-center">
+            <Button variant="secondary" className="flex items-center" onClick={handleEditClick}>
               <Edit size={16} className="mr-2" /> Editar
             </Button>
-            <Button variant="danger" className="flex items-center">
+            <Button variant="danger" className="flex items-center" onClick={() => setShowDeleteConfirm(true)}>
               <Trash2 size={16} className="mr-2" /> Eliminar
             </Button>
           </div>
@@ -186,6 +246,93 @@ const AssetDetailPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Edit Asset Modal */}
+      <Modal 
+        isOpen={isEditModalOpen} 
+        onClose={() => !isSubmitting && setIsEditModalOpen(false)}
+        title="Editar Activo"
+        maxWidth="max-w-2xl"
+      >
+        <form onSubmit={handleEditSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input label="Nombre del Activo" name="name" value={formData.name} onChange={handleInputChange} required />
+            
+            <div className="space-y-1.5 w-full">
+              <label className="text-sm font-medium text-[var(--text-secondary)]">Tipo de Activo</label>
+              <select name="type" value={formData.type} onChange={handleInputChange} className="w-full bg-[rgba(0,0,0,0.2)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all">
+                <option value="edificio" className="bg-[var(--bg-secondary)]">Edificio</option>
+                <option value="instalacion" className="bg-[var(--bg-secondary)]">Instalación</option>
+                <option value="maquinaria" className="bg-[var(--bg-secondary)]">Maquinaria</option>
+                <option value="equipo" className="bg-[var(--bg-secondary)]">Equipo</option>
+                <option value="proyecto" className="bg-[var(--bg-secondary)]">Proyecto Constructivo</option>
+                <option value="sucursal" className="bg-[var(--bg-secondary)]">Sucursal</option>
+              </select>
+            </div>
+
+            <div className="md:col-span-2">
+              <Input label="Ubicación" name="location" value={formData.location} onChange={handleInputChange} icon={MapPin} />
+            </div>
+
+            <Input label="Vida Útil (Años)" name="useful_life_years" type="number" min="1" value={formData.useful_life_years} onChange={handleInputChange} required />
+            <Input label="Valor de Salvamento ($)" name="salvage_value" type="number" step="0.01" min="0" value={formData.salvage_value} onChange={handleInputChange} />
+
+            <div className="space-y-1.5 w-full md:col-span-2">
+              <label className="text-sm font-medium text-[var(--text-secondary)]">Estado</label>
+              <select name="status" value={formData.status} onChange={handleInputChange} className="w-full bg-[rgba(0,0,0,0.2)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all">
+                <option value="activo" className="bg-[var(--bg-secondary)]">Activo</option>
+                <option value="en_mantenimiento" className="bg-[var(--bg-secondary)]">En Mantenimiento</option>
+                <option value="inactivo" className="bg-[var(--bg-secondary)]">Inactivo</option>
+              </select>
+            </div>
+            
+            <div className="md:col-span-2 space-y-1.5">
+              <label className="text-sm font-medium text-[var(--text-secondary)]">Descripción</label>
+              <textarea name="description" rows="3" value={formData.description} onChange={handleInputChange} className="w-full bg-[rgba(0,0,0,0.2)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all resize-none"></textarea>
+            </div>
+          </div>
+          
+          <div className="flex justify-end space-x-3 pt-4 mt-4 border-t border-[var(--border-light)]">
+            <Button type="button" variant="ghost" onClick={() => setIsEditModalOpen(false)}>Cancelar</Button>
+            <Button type="submit" isLoading={isSubmitting}>Guardar Cambios</Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShowDeleteConfirm(false)}>
+          <div
+            className="glass-panel p-8 max-w-sm w-full mx-4 border border-[rgba(255,255,255,0.1)] shadow-2xl animate-slide-up"
+            onClick={(e) => e.stopPropagation()}
+            style={{ backgroundColor: 'rgba(15,17,26,0.95)' }}
+          >
+            <div className="flex flex-col items-center text-center">
+              <div className="w-14 h-14 rounded-full bg-[rgba(239,68,68,0.15)] flex items-center justify-center mb-4">
+                <Trash2 size={28} className="text-[var(--status-danger)]" />
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">¿Eliminar este activo?</h3>
+              <p className="text-sm text-[var(--text-secondary)] mb-6">
+                Esta acción no se puede deshacer. Se eliminarán todos los datos, transacciones y registros asociados a este activo.
+              </p>
+              <div className="flex gap-3 w-full">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 py-3 rounded-xl font-semibold text-white bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] transition-all"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex-1 py-3 rounded-xl font-semibold text-white bg-[var(--status-danger)] hover:brightness-110 transition-all shadow-[0_0_20px_rgba(239,68,68,0.3)]"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

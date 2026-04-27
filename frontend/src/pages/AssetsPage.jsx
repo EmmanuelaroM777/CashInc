@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Plus, Search, Filter, MoreVertical, Building2, MapPin, Calendar } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import apiClient from '../api/client';
@@ -62,10 +62,19 @@ const AssetCard = ({ asset, onClick }) => {
 const AssetsPage = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [assets, setAssets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const searchQuery = params.get('search');
+    if (searchQuery !== null) {
+      setSearch(searchQuery);
+    }
+  }, [location.search]);
   
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
