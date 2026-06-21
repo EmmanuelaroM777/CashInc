@@ -30,7 +30,7 @@ const Header = ({ onMenuClick }) => {
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === '/dashboard') return t('header.titleDashboard');
-    if (path.startsWith('/assets/')) return t('header.titleAssets') + ' (Detalle)';
+    if (path.startsWith('/assets/')) return t('header.titleAssets') + ' ' + t('header.detail');
     if (path.startsWith('/assets')) return t('header.titleAssets');
     if (path.startsWith('/finances')) return t('header.titleFinances');
     if (path.startsWith('/reports')) return t('header.titleReports');
@@ -46,7 +46,7 @@ const Header = ({ onMenuClick }) => {
         <button onClick={onMenuClick} className="md:hidden mr-4 text-[var(--text-secondary)] hover:text-white transition-colors">
           <Menu size={24} />
         </button>
-        <h1 className="text-xl font-semibold tracking-tight text-white">{getPageTitle()}</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-[var(--text-primary)]">{getPageTitle()}</h1>
       </div>
 
       <div className="flex items-center space-x-4">

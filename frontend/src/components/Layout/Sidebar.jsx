@@ -32,7 +32,7 @@ const Sidebar = ({ onClose }) => {
       {/* Logo */}
       <Link to="/" className="h-16 flex items-center px-6 border-b border-[var(--border-light)] hover:opacity-80 transition-opacity">
         <img src="/logo.png" alt="CashInc Logo" className="w-9 h-9 object-contain mr-3 drop-shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-[var(--text-secondary)]">
+        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--text-primary)] to-[var(--text-secondary)]">
           CashInc
         </span>
       </Link>
@@ -49,8 +49,8 @@ const Sidebar = ({ onClose }) => {
               className={({ isActive }) => `
                 flex items-center px-4 py-3 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] relative overflow-hidden
                 ${isActive 
-                  ? 'text-white font-medium bg-gradient-to-r from-[rgba(59,130,246,0.15)] to-transparent border-l-4 border-[var(--accent-primary)] shadow-[-10px_0_20px_-10px_rgba(59,130,246,0.5)]' 
-                  : 'text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.03)] hover:text-white border-l-4 border-transparent'
+                  ? 'text-[var(--text-primary)] font-medium bg-gradient-to-r from-[rgba(59,130,246,0.15)] to-transparent border-l-4 border-[var(--accent-primary)] shadow-[-10px_0_20px_-10px_rgba(59,130,246,0.5)]' 
+                  : 'text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.03)] hover:text-[var(--text-primary)] border-l-4 border-transparent'
                 }
               `}
             >
@@ -75,7 +75,7 @@ const Sidebar = ({ onClose }) => {
             {user?.name?.charAt(0).toUpperCase()}
           </div>
           <div className="overflow-hidden">
-            <p className="text-sm font-medium text-white truncate">{user?.name}</p>
+            <p className="text-sm font-medium text-[var(--text-primary)] truncate">{user?.name}</p>
             <p className="text-xs text-[var(--text-muted)] truncate capitalize">{user?.role}</p>
           </div>
         </div>

@@ -48,7 +48,7 @@ const PlanCard = ({ title, price, description, features, icon: Icon, isPopular =
 
       {price === "0" ? (
         <div className="w-full py-4 rounded-xl font-semibold flex items-center justify-center bg-[rgba(255,255,255,0.05)] text-[var(--status-success)] border border-[rgba(16,185,129,0.2)] cursor-default">
-          ✓ Ya tienes este plan
+          ✓ {t('premium.alreadyHave')}
         </div>
       ) : (
         <button 

@@ -3,9 +3,11 @@ import { Bell, AlertTriangle, CheckCircle, Info, X } from 'lucide-react';
 import apiClient from '../api/client';
 import Loader from '../components/UI/Loader';
 import { AuthContext } from '../context/AuthContext';
+import { LanguageContext } from '../context/LanguageContext';
 
 const AlertsPage = () => {
   const { user } = useContext(AuthContext);
+  const { t } = useContext(LanguageContext);
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,11 +55,11 @@ const AlertsPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white flex items-center">
+          <h2 className="text-2xl font-bold text-[var(--text-primary)] flex items-center">
             <Bell className="mr-2" size={24} />
-            Centro de Alertas
+            {t('alerts.title')}
           </h2>
-          <p className="text-[var(--text-secondary)]">Notificaciones y avisos de control financiero</p>
+          <p className="text-[var(--text-secondary)]">{t('alerts.subtitle')}</p>
         </div>
       </div>
 
@@ -75,9 +77,9 @@ const AlertsPage = () => {
                       <Icon size={20} />
                     </div>
                     <div>
-                      <h4 className="text-white font-medium mb-1">
+                      <h4 className="text-[var(--text-primary)] font-medium mb-1">
                         {alert.type.replace('_', ' ').toUpperCase()}
-                        {alert.asset_name && <span className="ml-2 text-sm text-[var(--text-secondary)] font-normal">en {alert.asset_name}</span>}
+                        {alert.asset_name && <span className="ml-2 text-sm text-[var(--text-secondary)] font-normal">{t('alerts.inAsset')} {alert.asset_name}</span>}
                       </h4>
                       <p className="text-[var(--text-secondary)] text-sm">{alert.message}</p>
                       <p className="text-[var(--text-muted)] text-xs mt-2">{new Date(alert.created_at).toLocaleString()}</p>
@@ -86,8 +88,8 @@ const AlertsPage = () => {
                   {user?.role === 'admin' && (
                     <button 
                       onClick={() => handleDismiss(alert.id)}
-                      className="text-[var(--text-muted)] hover:text-white p-2 transition-colors opacity-0 group-hover:opacity-100"
-                      title="Descartar"
+                      className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-2 transition-colors opacity-0 group-hover:opacity-100"
+                      title={t('alerts.dismiss')}
                     >
                       <X size={20} />
                     </button>
@@ -99,8 +101,8 @@ const AlertsPage = () => {
         ) : (
           <div className="p-12 flex flex-col items-center justify-center text-center text-[var(--text-muted)]">
             <CheckCircle size={48} className="mb-4 text-[var(--status-success)] opacity-50" />
-            <h3 className="text-xl font-medium text-white mb-2">Todo en orden</h3>
-            <p>No tiene alertas activas en este momento.</p>
+            <h3 className="text-xl font-medium text-[var(--text-primary)] mb-2">{t('alerts.allClear')}</h3>
+            <p>{t('alerts.noAlerts')}</p>
           </div>
         )}
       </div>

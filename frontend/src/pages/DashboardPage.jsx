@@ -23,9 +23,10 @@ import Button from '../components/UI/Button';
 import TransactionModal from '../components/UI/TransactionModal';
 import WireframeCubes from '../components/UI/WireframeCubes';
 import { AuthContext } from '../context/AuthContext';
+import { LanguageContext } from '../context/LanguageContext';
 
 const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, highlight }) => (
-  <div className="glass-panel p-6 flex flex-col justify-between relative overflow-hidden group hover:border-[rgba(255,255,255,0.2)] transition-colors" style={{ backgroundColor: '#1a1c23', borderColor: 'rgba(255,255,255,0.05)' }}>
+  <div className="glass-panel p-6 flex flex-col justify-between relative overflow-hidden group hover:border-[var(--card-hover-border)] transition-colors" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
     <div className="flex justify-between items-start mb-6 z-10">
       <h3 className="text-[var(--text-secondary)] text-sm font-medium">{title}</h3>
       <div className={`p-2 rounded-full ${colorClass} bg-opacity-10`}>
@@ -33,7 +34,7 @@ const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, highlight })
       </div>
     </div>
     <div className="z-10">
-      <p className="text-3xl font-bold text-white tracking-tight mb-1">{value}</p>
+      <p className="text-3xl font-bold text-[var(--text-primary)] tracking-tight mb-1">{value}</p>
       {subtitle && <p className="text-xs text-[var(--text-muted)]">{subtitle}</p>}
       {highlight && <p className={`text-xs mt-1 ${highlight.startsWith('+') ? 'text-[var(--status-success)]' : 'text-[var(--text-muted)]'}`}>{highlight}</p>}
     </div>
@@ -44,6 +45,7 @@ const StatCard = ({ title, value, subtitle, icon: Icon, colorClass, highlight })
 
 const DashboardPage = () => {
   const { user } = useContext(AuthContext);
+  const { t } = useContext(LanguageContext);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
@@ -64,7 +66,7 @@ const DashboardPage = () => {
   }, []);
 
   if (loading) return <Loader />;
-  if (!summary) return <div className="text-center p-8">Error cargando datos del dashboard.</div>;
+  if (!summary) return <div className="text-center p-8">{t('dashboard.errorLoading')}</div>;
 
   // Custom Neon Colors for Donut Chart
   const COLORS = ['#06b6d4', '#8b5cf6', '#ef4444', '#10b981', '#3b82f6', '#f59e0b'];
@@ -76,19 +78,19 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="space-y-6" style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #0a0e1a, #111827)' }}>
+    <div className="space-y-6">
       
       {/* Header Section (Welcome Back) */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2">
         <div>
-          <h2 className="text-3xl font-bold text-white mb-1">Welcome back, {user?.name?.split(' ')[0]}!</h2>
-          <p className="text-[var(--text-secondary)]">Here's what's happening with your assets today</p>
+          <h2 className="text-3xl font-bold text-[var(--text-primary)] mb-1">{t('dashboard.welcome')} {user?.name?.split(' ')[0]}!</h2>
+          <p className="text-[var(--text-secondary)]">{t('dashboard.subtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           {user?.role === 'admin' && (
             <Button onClick={() => setIsExpenseModalOpen(true)} className="flex items-center">
               <Plus size={18} className="mr-2" />
-              Registrar Gasto
+              {t('dashboard.registerExpense')}
             </Button>
           )}
           <div className="px-4 py-2 rounded-full bg-[rgba(139,92,246,0.15)] border border-[rgba(139,92,246,0.3)] text-[var(--accent-tertiary)] font-medium text-sm capitalize flex items-center shadow-[0_0_15px_rgba(139,92,246,0.2)]">
@@ -100,31 +102,31 @@ const DashboardPage = () => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
-          title="Total Activos" 
+          title={t('dashboard.totalAssets')} 
           value={summary.total_assets} 
-          subtitle="Registros activos"
+          subtitle={t('dashboard.activeRecords')}
           icon={Users} 
           colorClass="bg-cyan-500"
         />
         <StatCard 
-          title="Inversión Total" 
+          title={t('dashboard.totalInvestment')} 
           value={formatCurrency(summary.total_investment)} 
-          subtitle="Inversión inicial global"
+          subtitle={t('dashboard.globalInvestment')}
           icon={Calendar} 
           colorClass="bg-purple-500"
         />
         <StatCard 
-          title="Gastos Totales" 
+          title={t('dashboard.totalExpenses')} 
           value={formatCurrency(summary.total_expenses)} 
-          subtitle={`${summary.top_assets_by_cost?.length || 0} activos con gastos`}
+          subtitle={`${summary.top_assets_by_cost?.length || 0} ${t('dashboard.assetsWithExpenses')}`}
           icon={Bed} 
           colorClass="bg-emerald-500"
         />
         <StatCard 
-          title="ROI Promedio" 
+          title={t('dashboard.avgRoi')} 
           value={`${summary.average_roi}%`} 
-          subtitle="Rendimiento Global"
-          highlight={summary.average_roi > 0 ? "Objetivo alcanzado" : "Bajo rendimiento"}
+          subtitle={t('dashboard.globalPerformance')}
+          highlight={summary.average_roi > 0 ? t('dashboard.goalReached') : t('dashboard.lowPerformance')}
           icon={CircleDollarSign} 
           colorClass="bg-amber-500"
         />
@@ -132,15 +134,15 @@ const DashboardPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main Area Chart */}
-        <div className="lg:col-span-2 glass-panel p-6" style={{ backgroundColor: '#1a1c23', borderColor: 'rgba(255,255,255,0.05)' }}>
+        <div className="lg:col-span-2 glass-panel p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
           <div className="flex justify-between items-center mb-6">
             <div>
-              <h3 className="text-lg font-medium text-white">Flujo Financiero</h3>
-              <p className="text-xs text-[var(--text-muted)]">Gastos mensuales vs Ingresos</p>
+              <h3 className="text-lg font-medium text-[var(--text-primary)]">{t('dashboard.financialFlow')}</h3>
+              <p className="text-xs text-[var(--text-muted)]">{t('dashboard.monthlyExpVsInc')}</p>
             </div>
             <div className="flex items-center gap-4 text-xs">
-              <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-[var(--accent-tertiary)] mr-2 shadow-[0_0_8px_var(--accent-tertiary)]"></span> Gastos</div>
-              <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-[var(--accent-secondary)] mr-2 shadow-[0_0_8px_var(--accent-secondary)]"></span> Ingresos</div>
+              <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-[var(--accent-tertiary)] mr-2 shadow-[0_0_8px_var(--accent-tertiary)]"></span> {t('dashboard.expenses')}</div>
+              <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-[var(--accent-secondary)] mr-2 shadow-[0_0_8px_var(--accent-secondary)]"></span> {t('dashboard.income')}</div>
             </div>
           </div>
           
@@ -161,22 +163,22 @@ const DashboardPage = () => {
                 <XAxis dataKey="month" stroke="var(--text-muted)" tick={{fill: 'var(--text-muted)', fontSize: 12}} axisLine={false} tickLine={false} />
                 <YAxis stroke="var(--text-muted)" tick={{fill: 'var(--text-muted)', fontSize: 12}} tickFormatter={(value) => `${value/1000}k`} axisLine={false} tickLine={false} />
                 <RechartsTooltip 
-                  contentStyle={{ backgroundColor: '#111827', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px', color: 'white' }}
-                  itemStyle={{ color: 'white' }}
+                  contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', borderRadius: '8px', color: 'var(--text-primary)' }}
+                  itemStyle={{ color: 'var(--text-primary)' }}
                   formatter={(value) => formatCurrency(value)}
-                  labelFormatter={(label) => `Mes: ${label}`}
+                  labelFormatter={(label) => `${t('dashboard.month')}: ${label}`}
                 />
-                <Area type="monotone" dataKey="expenses" name="Gastos" stroke="var(--accent-tertiary)" strokeWidth={3} fillOpacity={1} fill="url(#colorGastos)" activeDot={{ r: 6, fill: "var(--accent-tertiary)", stroke: "white", strokeWidth: 2 }} />
-                <Area type="monotone" dataKey="income" name="Ingresos" stroke="var(--accent-secondary)" strokeWidth={3} fillOpacity={1} fill="url(#colorIngresos)" activeDot={{ r: 6, fill: "var(--accent-secondary)", stroke: "white", strokeWidth: 2 }} />
+                <Area type="monotone" dataKey="expenses" name={t('dashboard.expenses')} stroke="var(--accent-tertiary)" strokeWidth={3} fillOpacity={1} fill="url(#colorGastos)" activeDot={{ r: 6, fill: "var(--accent-tertiary)", stroke: "white", strokeWidth: 2 }} />
+                <Area type="monotone" dataKey="income" name={t('dashboard.income')} stroke="var(--accent-secondary)" strokeWidth={3} fillOpacity={1} fill="url(#colorIngresos)" activeDot={{ r: 6, fill: "var(--accent-secondary)", stroke: "white", strokeWidth: 2 }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Donut Chart */}
-        <div className="glass-panel p-6" style={{ backgroundColor: '#1a1c23', borderColor: 'rgba(255,255,255,0.05)' }}>
-          <h3 className="text-lg font-medium text-white mb-2">Distribución de Gastos</h3>
-          <p className="text-xs text-[var(--text-muted)] mb-4">Gastos clasificados por categoría</p>
+        <div className="glass-panel p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
+          <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">{t('dashboard.expenseDistribution')}</h3>
+          <p className="text-xs text-[var(--text-muted)] mb-4">{t('dashboard.byCategory')}</p>
           
           <div className="h-[220px] w-full flex flex-col items-center justify-center relative">
             {summary.expenses_by_category && summary.expenses_by_category.length > 0 ? (
@@ -199,20 +201,20 @@ const DashboardPage = () => {
                   </Pie>
                   <RechartsTooltip 
                     formatter={(value) => formatCurrency(value)}
-                    contentStyle={{ backgroundColor: '#111827', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '8px', border: 'none' }}
-                    itemStyle={{ color: 'white', fontWeight: 'bold' }}
+                    contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', borderRadius: '8px', border: 'none' }}
+                    itemStyle={{ color: 'var(--text-primary)', fontWeight: 'bold' }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-[var(--text-muted)] text-sm">No hay datos de gastos</p>
+              <p className="text-[var(--text-muted)] text-sm">{t('dashboard.noExpenseData')}</p>
             )}
             
             {/* Center Text inside Donut */}
             {summary.expenses_by_category && summary.expenses_by_category.length > 0 && (
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-[var(--text-muted)] text-xs">Total</span>
-                <span className="text-white font-bold text-lg">{formatCurrency(summary.total_expenses)}</span>
+                <span className="text-[var(--text-muted)] text-xs">{t('dashboard.total')}</span>
+                <span className="text-[var(--text-primary)] font-bold text-lg">{formatCurrency(summary.total_expenses)}</span>
               </div>
             )}
           </div>
@@ -227,7 +229,7 @@ const DashboardPage = () => {
                     <span className="w-2.5 h-2.5 rounded-full mr-2" style={{ backgroundColor: COLORS[index % COLORS.length], boxShadow: `0 0 5px ${COLORS[index % COLORS.length]}` }}></span>
                     <span className="capitalize truncate max-w-[70px]">{entry.category}</span>
                   </div>
-                  <span className="text-white font-medium ml-1">{percentage}%</span>
+                  <span className="text-[var(--text-primary)] font-medium ml-1">{percentage}%</span>
                 </div>
               );
             })}

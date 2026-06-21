@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 import { LanguageProvider } from './context/LanguageContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 import Layout from './components/Layout/Layout';
 import Loader from './components/UI/Loader';
@@ -32,6 +33,7 @@ const ProtectedRoute = ({ children }) => {
 
 function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <LanguageProvider>
         <BrowserRouter>
@@ -53,6 +55,7 @@ function App() {
       </BrowserRouter>
       </LanguageProvider>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { User, Lock, Globe, Users, Save, CheckCircle } from 'lucide-react';
+import { User, Lock, Globe, Users, Save, CheckCircle, Sun, Moon, Palette } from 'lucide-react';
 import { AuthContext } from '../context/AuthContext';
 import { LanguageContext } from '../context/LanguageContext';
+import { ThemeContext } from '../context/ThemeContext';
 import apiClient from '../api/client';
 import Button from '../components/UI/Button';
 import Input from '../components/UI/Input';
@@ -9,7 +10,8 @@ import Loader from '../components/UI/Loader';
 
 const SettingsPage = () => {
   const { user } = useContext(AuthContext);
-  const { t, setLanguage } = useContext(LanguageContext);
+  const { t, language, setLanguage } = useContext(LanguageContext);
+  const { theme, toggleTheme } = useContext(ThemeContext);
   
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
@@ -21,7 +23,7 @@ const SettingsPage = () => {
     name: user?.name || '',
     email: user?.email || '',
     password: '',
-    language: 'es'
+    language: language || 'es'
   });
 
   // Workers state
@@ -48,6 +50,10 @@ const SettingsPage = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Immediately change language when dropdown changes
+    if (name === 'language') {
+      setLanguage(value);
+    }
   };
 
   const handleSubmitProfile = async (e) => {
@@ -82,7 +88,7 @@ const SettingsPage = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white">{t('settings.title')}</h2>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">{t('settings.title')}</h2>
           <p className="text-[var(--text-secondary)]">{t('settings.subtitle')}</p>
         </div>
       </div>
@@ -94,8 +100,8 @@ const SettingsPage = () => {
             onClick={() => setActiveTab('profile')}
             className={`w-full flex items-center p-3 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] relative overflow-hidden ${
               activeTab === 'profile' 
-                ? 'text-white font-medium bg-gradient-to-r from-[rgba(139,92,246,0.15)] to-transparent border-l-4 border-[var(--accent-tertiary)] shadow-[-10px_0_20px_-10px_rgba(139,92,246,0.5)]' 
-                : 'text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.03)] hover:text-white border-l-4 border-transparent'
+                ? 'text-[var(--text-primary)] font-medium bg-gradient-to-r from-[rgba(139,92,246,0.15)] to-transparent border-l-4 border-[var(--accent-tertiary)] shadow-[-10px_0_20px_-10px_rgba(139,92,246,0.5)]' 
+                : 'text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.03)] hover:text-[var(--text-primary)] border-l-4 border-transparent'
             }`}
           >
             <User size={18} className={`mr-3 transition-colors duration-300 relative z-10 ${activeTab === 'profile' ? 'text-[var(--accent-tertiary)] drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]' : ''}`} /> 
@@ -108,8 +114,8 @@ const SettingsPage = () => {
               onClick={() => setActiveTab('workers')}
               className={`w-full flex items-center p-3 rounded-xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] relative overflow-hidden ${
                 activeTab === 'workers' 
-                  ? 'text-white font-medium bg-gradient-to-r from-[rgba(139,92,246,0.15)] to-transparent border-l-4 border-[var(--accent-tertiary)] shadow-[-10px_0_20px_-10px_rgba(139,92,246,0.5)]' 
-                  : 'text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.03)] hover:text-white border-l-4 border-transparent'
+                  ? 'text-[var(--text-primary)] font-medium bg-gradient-to-r from-[rgba(139,92,246,0.15)] to-transparent border-l-4 border-[var(--accent-tertiary)] shadow-[-10px_0_20px_-10px_rgba(139,92,246,0.5)]' 
+                  : 'text-[var(--text-secondary)] hover:bg-[rgba(255,255,255,0.03)] hover:text-[var(--text-primary)] border-l-4 border-transparent'
               }`}
             >
               <Users size={18} className={`mr-3 transition-colors duration-300 relative z-10 ${activeTab === 'workers' ? 'text-[var(--accent-tertiary)] drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]' : ''}`} /> 
@@ -123,7 +129,7 @@ const SettingsPage = () => {
         <div className="flex-1 glass-panel p-6">
           {activeTab === 'profile' && (
             <div className="max-w-2xl animate-fade-in">
-              <h3 className="text-xl font-semibold text-white mb-6">{t('settings.personalInfo')}</h3>
+              <h3 className="text-xl font-semibold text-[var(--text-primary)] mb-6">{t('settings.personalInfo')}</h3>
               
               {successMsg && (
                 <div className="mb-6 p-4 rounded-lg bg-[rgba(16,185,129,0.1)] border border-[var(--status-success)] flex items-center text-[var(--status-success)]">
@@ -159,7 +165,7 @@ const SettingsPage = () => {
                         name="language" 
                         value={formData.language} 
                         onChange={handleInputChange} 
-                        className="w-full bg-[rgba(0,0,0,0.2)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg pl-10 px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
+                        className="w-full bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg pl-10 px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
                       >
                         <option value="es" className="bg-[var(--bg-secondary)]">Español</option>
                         <option value="en" className="bg-[var(--bg-secondary)]">English</option>
@@ -168,8 +174,53 @@ const SettingsPage = () => {
                   </div>
                 </div>
 
+                {/* Appearance Section */}
                 <div className="pt-6 border-t border-[var(--border-light)]">
-                  <h3 className="text-lg font-medium text-white mb-4">{t('settings.security')}</h3>
+                  <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2 flex items-center">
+                    <Palette size={20} className="mr-2 text-[var(--accent-tertiary)]" />
+                    {t('settings.appearance')}
+                  </h3>
+                  <p className="text-sm text-[var(--text-secondary)] mb-5">
+                    {t('settings.themeDesc')}
+                  </p>
+                  
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-[var(--input-bg)] border border-[var(--border-light)]">
+                    <div className="flex items-center gap-3">
+                      {theme === 'dark' ? (
+                        <Moon size={22} className="text-[var(--accent-tertiary)]" />
+                      ) : (
+                        <Sun size={22} className="text-amber-500" />
+                      )}
+                      <div>
+                        <p className="font-medium text-[var(--text-primary)]">
+                          {theme === 'dark' ? t('settings.darkMode') : t('settings.lightMode')}
+                        </p>
+                        <p className="text-xs text-[var(--text-muted)]">
+                          {t('settings.theme')}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <button
+                      type="button"
+                      onClick={toggleTheme}
+                      className="theme-toggle"
+                      data-active={theme === 'light' ? 'true' : 'false'}
+                      aria-label="Toggle theme"
+                    >
+                      <div className="theme-toggle-knob">
+                        {theme === 'dark' ? (
+                          <Moon size={14} className="text-blue-300" />
+                        ) : (
+                          <Sun size={14} className="text-amber-500" />
+                        )}
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-6 border-t border-[var(--border-light)]">
+                  <h3 className="text-lg font-medium text-[var(--text-primary)] mb-4">{t('settings.security')}</h3>
                   <p className="text-sm text-[var(--text-secondary)] mb-4">
                     {t('settings.passwordHint')}
                   </p>
@@ -196,9 +247,9 @@ const SettingsPage = () => {
           {activeTab === 'workers' && user?.role === 'admin' && (
             <div className="animate-fade-in">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-semibold text-white">{t('settings.myTeam')}</h3>
+                <h3 className="text-xl font-semibold text-[var(--text-primary)]">{t('settings.myTeam')}</h3>
                 <div className="text-sm px-3 py-1 bg-[rgba(255,255,255,0.05)] border border-[var(--border-light)] rounded-md text-[var(--text-secondary)]">
-                  {t('settings.companyCodePrefix')} <span className="text-white font-mono font-bold tracking-wider">{user?.company_code}</span>
+                  {t('settings.companyCodePrefix')} <span className="text-[var(--text-primary)] font-mono font-bold tracking-wider">{user?.company_code}</span>
                 </div>
               </div>
 
@@ -218,7 +269,7 @@ const SettingsPage = () => {
                       {workers.length > 0 ? (
                         workers.map((worker) => (
                           <tr key={worker.id} className="hover:bg-[rgba(255,255,255,0.02)] transition-colors">
-                            <td className="p-4 text-white font-medium flex items-center">
+                            <td className="p-4 text-[var(--text-primary)] font-medium flex items-center">
                               <div className="w-8 h-8 rounded-full bg-[var(--accent-primary)] bg-opacity-20 flex items-center justify-center text-[var(--accent-primary)] font-bold mr-3">
                                 {worker.name.charAt(0).toUpperCase()}
                               </div>
@@ -232,7 +283,7 @@ const SettingsPage = () => {
                         <tr>
                           <td colSpan="3" className="p-8 text-center text-[var(--text-muted)]">
                             {t('settings.noWorkers')} <br/>
-                            {t('settings.shareCode')} <span className="text-white font-mono">{user?.company_code}</span> {t('settings.registerHint')}
+                            {t('settings.shareCode')} <span className="text-[var(--text-primary)] font-mono">{user?.company_code}</span> {t('settings.registerHint')}
                           </td>
                         </tr>
                       )}

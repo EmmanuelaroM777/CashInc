@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  /* Dark mode color palette */
+  /* Dark mode color palette (default) */
   --bg-primary: #0a0e1a;
   --bg-secondary: #111827;
   --bg-glass: rgba(17, 24, 39, 0.7);
@@ -30,6 +30,17 @@
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
   --shadow-glow: 0 0 15px rgba(59, 130, 246, 0.5);
   
+  /* Card backgrounds */
+  --card-bg: #1a1c23;
+  --card-border: rgba(255, 255, 255, 0.05);
+  --card-hover-border: rgba(255, 255, 255, 0.2);
+  
+  /* Input backgrounds */
+  --input-bg: rgba(0, 0, 0, 0.2);
+  
+  /* Overlay / backdrop */
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  
   /* Font Families */
   --font-main: 'Inter', system-ui, -apple-system, sans-serif;
   
@@ -43,6 +54,58 @@
   /* Transitions */
   --transition-fast: 0.15s ease-in-out;
   --transition-normal: 0.3s ease-in-out;
+
+  /* Scrollbar */
+  --scrollbar-track: #0a0e1a;
+  --scrollbar-thumb: #374151;
+  --scrollbar-thumb-hover: #4b5563;
+}
+
+/* ================================ */
+/* LIGHT MODE VARIABLES             */
+/* ================================ */
+[data-theme="light"] {
+  --bg-primary: #f0f2f5;
+  --bg-secondary: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.85);
+  --text-primary: #1a1a2e;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+  
+  /* Accents - slightly deeper for contrast on light bg */
+  --accent-primary: #2563eb;
+  --accent-primary-hover: #1d4ed8;
+  --accent-secondary: #0891b2;
+  --accent-tertiary: #7c3aed;
+  
+  /* Status Colors - same but slightly adjusted */
+  --status-success: #059669;
+  --status-warning: #d97706;
+  --status-danger: #dc2626;
+  --status-info: #2563eb;
+
+  /* Borders & Shadows */
+  --border-light: rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+  --shadow-glow: 0 0 15px rgba(37, 99, 235, 0.2);
+  
+  /* Card backgrounds */
+  --card-bg: #ffffff;
+  --card-border: rgba(0, 0, 0, 0.06);
+  --card-hover-border: rgba(0, 0, 0, 0.15);
+  
+  /* Input backgrounds */
+  --input-bg: rgba(0, 0, 0, 0.03);
+  
+  /* Overlay / backdrop */
+  --overlay-bg: rgba(0, 0, 0, 0.3);
+
+  /* Scrollbar */
+  --scrollbar-track: #f0f2f5;
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
 }
 
 * {
@@ -59,6 +122,7 @@ body {
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -85,11 +149,12 @@ a:hover {
   border: 1px solid var(--border-light);
   border-radius: 12px;
   box-shadow: var(--shadow-md);
+  transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 /* Form Elements */
 input, select, textarea {
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: var(--input-bg);
   border: 1px solid var(--border-light);
   color: var(--text-primary);
   padding: 0.75rem 1rem;
@@ -112,16 +177,16 @@ input:focus, select:focus, textarea:focus {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-primary);
+  background: var(--scrollbar-track);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #374151;
+  background: var(--scrollbar-thumb);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4b5563;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Base App Layout */
@@ -180,6 +245,13 @@ input:focus, select:focus, textarea:focus {
   transform: translateY(-5px);
 }
 
+[data-theme="light"] .neon-hover:hover {
+  box-shadow: 0 8px 30px rgba(37, 99, 235, 0.15),
+              0 4px 15px rgba(124, 58, 237, 0.1);
+  border-color: rgba(37, 99, 235, 0.4);
+  transform: translateY(-5px);
+}
+
 /* Landing Nav Glow Links */
 .nav-glow-link {
   position: relative;
@@ -191,6 +263,10 @@ input:focus, select:focus, textarea:focus {
   border-radius: 8px;
   overflow: hidden;
   text-decoration: none;
+}
+
+[data-theme="light"] .nav-glow-link {
+  color: #475569;
 }
 
 .nav-glow-link::before {
@@ -209,6 +285,10 @@ input:focus, select:focus, textarea:focus {
 .nav-glow-link:hover {
   color: #0a0e1a;
   transition-delay: 0.5s;
+}
+
+[data-theme="light"] .nav-glow-link:hover {
+  color: #ffffff;
 }
 
 .nav-glow-link:hover::before {
@@ -234,4 +314,102 @@ input:focus, select:focus, textarea:focus {
   height: 100%;
   transition-delay: 0.4s;
   filter: blur(0px);
+}
+
+/* ================================ */
+/* THEME TOGGLE SWITCH              */
+/* ================================ */
+.theme-toggle {
+  position: relative;
+  width: 64px;
+  height: 32px;
+  border-radius: 999px;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: hidden;
+}
+
+.theme-toggle[data-active="false"] {
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 12px rgba(99, 102, 241, 0.2);
+}
+
+.theme-toggle[data-active="true"] {
+  background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 12px rgba(56, 189, 248, 0.3);
+}
+
+.theme-toggle-knob {
+  position: absolute;
+  top: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.theme-toggle[data-active="false"] .theme-toggle-knob {
+  left: 3px;
+  background: linear-gradient(135deg, #334155, #475569);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.theme-toggle[data-active="true"] .theme-toggle-knob {
+  left: 35px;
+  background: linear-gradient(135deg, #ffffff, #f0f9ff);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ================================ */
+/* LANDING PAGE LIGHT MODE          */
+/* ================================ */
+[data-theme="light"] .landing-bg {
+  background-color: #f8fafc !important;
+  color: var(--text-primary);
+}
+
+[data-theme="light"] .landing-header {
+  background: rgba(248, 250, 252, 0.9) !important;
+  border-color: rgba(37, 99, 235, 0.1) !important;
+}
+
+[data-theme="light"] .landing-card {
+  background: #ffffff !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .landing-card h3 {
+  color: var(--accent-primary) !important;
+}
+
+[data-theme="light"] .landing-section-overlay {
+  background: linear-gradient(to right, rgba(248,250,252,0.97), rgba(248,250,252,0.9), rgba(248,250,252,0.8)) !important;
+}
+
+[data-theme="light"] .landing-purpose-card {
+  background: rgba(37, 99, 235, 0.04) !important;
+  border-color: rgba(37, 99, 235, 0.15) !important;
+}
+
+[data-theme="light"] .landing-flip-front {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .landing-footer {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Option element backgrounds for light mode */
+[data-theme="light"] option {
+  background-color: #ffffff;
+  color: var(--text-primary);
 }
