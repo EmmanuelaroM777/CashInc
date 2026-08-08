@@ -94,8 +94,8 @@ const WireframeCubes = () => {
       ref={containerRef} 
       className="glass-panel overflow-hidden relative"
       style={{ 
-        backgroundColor: '#1a1c23', 
-        borderColor: 'rgba(255,255,255,0.05)',
+        backgroundColor: 'var(--card-bg)', 
+        borderColor: 'var(--border-light)',
         height: '320px',
       }}
     >

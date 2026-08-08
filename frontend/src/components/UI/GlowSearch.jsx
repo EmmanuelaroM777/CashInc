@@ -63,15 +63,16 @@ const StyledWrapper = styled.div`
     filter: blur(3px);
   }
   .input {
-    background-color: #0a0e1a;
-    border: none;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-light);
     width: 220px;
     height: 38px;
     border-radius: 999px;
-    color: white;
+    color: var(--text-primary);
     padding-left: 38px;
     padding-right: 16px;
     font-size: 13px;
+    transition: all 0.3s ease;
   }
   #poda {
     display: flex;
@@ -79,10 +80,11 @@ const StyledWrapper = styled.div`
     justify-content: center;
   }
   .input::placeholder {
-    color: #6b7280;
+    color: var(--text-muted);
   }
   .input:focus {
     outline: none;
+    border-color: var(--accent-primary);
   }
   #main:focus-within > #input-mask {
     display: none;
@@ -92,7 +94,7 @@ const StyledWrapper = styled.div`
     width: 60px;
     height: 16px;
     position: absolute;
-    background: linear-gradient(90deg, transparent, #0a0e1a);
+    background: linear-gradient(90deg, transparent, var(--input-bg));
     top: 11px;
     left: 50px;
   }
@@ -160,12 +162,12 @@ const StyledWrapper = styled.div`
     background-repeat: no-repeat;
     background-position: 0 0;
     background-image: conic-gradient(
-      #0a0e1a,
+      var(--bg-secondary),
       #3b82f6 5%,
-      #0a0e1a 14%,
-      #0a0e1a 50%,
+      var(--bg-secondary) 14%,
+      var(--bg-secondary) 50%,
       #8b5cf6 60%,
-      #0a0e1a 64%
+      var(--bg-secondary) 64%
     );
     transition: all 2s;
   }
