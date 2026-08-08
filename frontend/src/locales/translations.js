@@ -3,6 +3,7 @@ export const translations = {
     sidebar: {
       dashboard: "Dashboard",
       assets: "Activos",
+      maintenance: "Mantenimiento",
       finances: "Finanzas",
       reports: "Reportes",
       alerts: "Alertas",
@@ -283,6 +284,7 @@ export const translations = {
     sidebar: {
       dashboard: "Dashboard",
       assets: "Assets",
+      maintenance: "Maintenance",
       finances: "Finances",
       reports: "Reports",
       alerts: "Alerts",

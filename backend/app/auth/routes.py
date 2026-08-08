@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from app.auth.schemas import UserCreate, UserLogin, UserResponse, Token, UserUpdate, WorkerResponse
+from app.auth.schemas import UserCreate, UserLogin, UserResponse, Token, UserUpdate, WorkerResponse, ForgotPasswordRequest, ResetPasswordRequest
 from app.auth.service import (
     register_user,
     authenticate_user,
@@ -9,6 +9,8 @@ from app.auth.service import (
     require_admin,
     update_user_profile,
     get_company_workers,
+    request_password_recovery,
+    reset_password_with_token,
 )
 
 router = APIRouter()
@@ -111,3 +113,15 @@ async def list_workers(current_user: dict = Depends(require_admin)):
     """List workers associated with the admin's company."""
     workers = await get_company_workers(current_user["id"])
     return workers
+
+@router.post("/forgot-password")
+async def forgot_password(data: ForgotPasswordRequest):
+    """Request a password recovery code."""
+    code = await request_password_recovery(data.email)
+    return {"message": "Código de recuperación enviado. Por favor revise su correo.", "code_simulated": code}
+
+@router.post("/reset-password")
+async def reset_password(data: ResetPasswordRequest):
+    """Reset password using code."""
+    await reset_password_with_token(data.email, data.token, data.new_password)
+    return {"message": "Contraseña restablecida con éxito"}

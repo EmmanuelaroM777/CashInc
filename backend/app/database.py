@@ -22,6 +22,13 @@ async def connect_to_database():
     await db.budgets.create_index("user_id")
     await db.budgets.create_index("asset_id")
     await db.alerts.create_index([("user_id", 1), ("dismissed", 1)])
+    await db.maintenances.create_index("asset_id")
+    await db.maintenances.create_index("status")
+    await db.maintenances.create_index("scheduled_date")
+    await db.maintenances.create_index("user_id")
+    await db.audit_logs.create_index("user_id")
+    await db.audit_logs.create_index("action")
+    await db.audit_logs.create_index("timestamp")
 
     print(f"✅ Conectado a MongoDB: {settings.DB_NAME}")
 

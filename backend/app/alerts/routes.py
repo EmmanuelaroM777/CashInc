@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from app.auth.service import get_current_user, require_admin
-from app.alerts.service import get_alerts, dismiss_alert, get_alert_count, generate_depreciation_alerts
+from app.alerts.service import get_alerts, dismiss_alert, get_alert_count, run_all_alert_checks
 
 router = APIRouter()
 
@@ -11,6 +11,7 @@ async def list_alerts(
     current_user: dict = Depends(get_current_user),
 ):
     """List all alerts. Available to all users."""
+    await run_all_alert_checks(current_user["tenant_id"])
     alerts = await get_alerts(current_user["tenant_id"], dismissed)
     count = await get_alert_count(current_user["tenant_id"])
     return {

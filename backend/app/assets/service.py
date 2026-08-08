@@ -128,6 +128,10 @@ async def create_asset(user_id: str, asset_data: dict) -> dict:
         "useful_life_years": asset_data["useful_life_years"],
         "salvage_value": asset_data.get("salvage_value", 0),
         "status": asset_data.get("status", "activo"),
+        "physical_state": asset_data.get("physical_state", "excelente"),
+        "brand": asset_data.get("brand", ""),
+        "model": asset_data.get("model", ""),
+        "serial_number": asset_data.get("serial_number", ""),
         "tags": asset_data.get("tags", []),
         "created_at": now,
         "updated_at": now,
@@ -135,6 +139,15 @@ async def create_asset(user_id: str, asset_data: dict) -> dict:
 
     result = await db.assets.insert_one(doc)
     doc["_id"] = result.inserted_id
+
+    # Log action
+    from app.audit.service import log_action
+    await log_action(
+        user_id=user_id,
+        action="activo_creado",
+        details=f"Creado activo '{doc['name']}' con inversión inicial de ${doc['initial_investment']:.2f}"
+    )
+
     return doc
 
 
@@ -165,7 +178,15 @@ async def get_assets(
     assets = []
     async for asset in cursor:
         financial = await get_asset_financial_data(asset)
-        assets.append({**asset, **financial})
+        asset_details = {
+            **asset,
+            "physical_state": asset.get("physical_state", "excelente"),
+            "brand": asset.get("brand", ""),
+            "model": asset.get("model", ""),
+            "serial_number": asset.get("serial_number", ""),
+            **financial
+        }
+        assets.append(asset_details)
     return assets
 
 
@@ -183,7 +204,14 @@ async def get_asset_by_id(asset_id: str, user_id: str) -> dict:
         raise HTTPException(status_code=404, detail="Activo no encontrado")
 
     financial = await get_asset_financial_data(asset)
-    return {**asset, **financial}
+    return {
+        **asset,
+        "physical_state": asset.get("physical_state", "excelente"),
+        "brand": asset.get("brand", ""),
+        "model": asset.get("model", ""),
+        "serial_number": asset.get("serial_number", ""),
+        **financial
+    }
 
 
 async def update_asset(asset_id: str, user_id: str, update_data: dict) -> dict:
@@ -205,12 +233,25 @@ async def update_asset(asset_id: str, user_id: str, update_data: dict) -> dict:
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Activo no encontrado")
 
-    return await get_asset_by_id(asset_id, user_id)
+    updated_asset = await get_asset_by_id(asset_id, user_id)
+    # Log action
+    from app.audit.service import log_action
+    await log_action(
+        user_id=user_id,
+        action="activo_actualizado",
+        details=f"Actualizado activo '{updated_asset['name']}' (ID: {asset_id})"
+    )
+    return updated_asset
 
 
 async def delete_asset(asset_id: str, user_id: str) -> bool:
     """Delete an asset and its related transactions, budgets, and alerts."""
     db = get_database()
+
+    # Get details first for logging
+    asset = await db.assets.find_one({"_id": ObjectId(asset_id), "user_id": user_id})
+    if not asset:
+        raise HTTPException(status_code=404, detail="Activo no encontrado")
 
     result = await db.assets.delete_one(
         {"_id": ObjectId(asset_id), "user_id": user_id}
@@ -223,6 +264,14 @@ async def delete_asset(asset_id: str, user_id: str) -> bool:
     await db.transactions.delete_many({"asset_id": asset_id})
     await db.budgets.delete_many({"asset_id": asset_id})
     await db.alerts.delete_many({"asset_id": asset_id})
+
+    # Log action
+    from app.audit.service import log_action
+    await log_action(
+        user_id=user_id,
+        action="activo_eliminado",
+        details=f"Eliminado activo '{asset['name']}' (ID: {asset_id}) y sus dependencias"
+    )
 
     return True
 

@@ -88,3 +88,20 @@ class WorkerResponse(BaseModel):
     email: str
     created_at: datetime
 
+
+class ForgotPasswordRequest(BaseModel):
+    """Schema for requesting password recovery."""
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    """Schema for resetting password using verification code."""
+    email: EmailStr
+    token: str
+    new_password: str
+
+    @field_validator("new_password")
+    @classmethod
+    def password_strength(cls, v):
+        return validate_password_strength(v)
+

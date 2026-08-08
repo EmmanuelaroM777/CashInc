@@ -11,6 +11,7 @@ import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import AssetsPage from './pages/AssetsPage';
 import AssetDetailPage from './pages/AssetDetailPage';
+import MaintenancePage from './pages/MaintenancePage';
 import FinancePage from './pages/FinancePage';
 import ReportsPage from './pages/ReportsPage';
 import AlertsPage from './pages/AlertsPage';
@@ -44,6 +45,7 @@ function App() {
           <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
           <Route path="/assets" element={<ProtectedRoute><AssetsPage /></ProtectedRoute>} />
           <Route path="/assets/:id" element={<ProtectedRoute><AssetDetailPage /></ProtectedRoute>} />
+          <Route path="/maintenance" element={<ProtectedRoute><MaintenancePage /></ProtectedRoute>} />
           <Route path="/finances" element={<ProtectedRoute><FinancePage /></ProtectedRoute>} />
           <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
           <Route path="/alerts" element={<ProtectedRoute><AlertsPage /></ProtectedRoute>} />

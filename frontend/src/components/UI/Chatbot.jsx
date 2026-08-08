@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
-import { MessageSquare, X, ChevronRight } from 'lucide-react';
+import { MessageSquare, X, ChevronRight, Send } from 'lucide-react';
 import { LanguageContext } from '../../context/LanguageContext';
+import apiClient from '../../api/client';
 
 const Chatbot = () => {
   const { t } = useContext(LanguageContext);
-
+  const [isOpen, setIsOpen] = useState(false);
+  const [inputText, setInputText] = useState('');
+  
   const getChatNodes = () => ({
     inicio: {
       text: t('chatbot.inicio'),
@@ -82,7 +85,6 @@ const Chatbot = () => {
     }
   });
 
-  const [isOpen, setIsOpen] = useState(false);
   const CHAT_NODES = getChatNodes();
   const [messages, setMessages] = useState([
     { id: 1, sender: 'bot', text: CHAT_NODES.inicio.text, options: CHAT_NODES.inicio.options }
@@ -104,14 +106,12 @@ const Chatbot = () => {
       newMessages[newMessages.length - 1].options = [];
     }
 
-    // If going back to inicio, respond instantly
     if (option.next === 'inicio') {
       const nextNode = CHAT_NODES[option.next];
       setMessages([...newMessages, userMessage, { id: Date.now() + 1, sender: 'bot', text: nextNode.text, options: nextNode.options }]);
       return;
     }
 
-    // Otherwise show loading animation for 5s
     const loadingId = Date.now() + 1;
     setMessages([...newMessages, userMessage, { id: loadingId, sender: 'bot', isLoading: true }]);
 
@@ -124,7 +124,43 @@ const Chatbot = () => {
             .concat({ id: Date.now(), sender: 'bot', text: nextNode.text, options: nextNode.options })
         );
       }
-    }, 5000);
+    }, 1000); // Shorter delay for smoother experience
+  };
+
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!inputText.trim()) return;
+
+    const userText = inputText;
+    setInputText('');
+
+    // Append user message
+    const userMsg = { id: Date.now(), sender: 'user', text: userText };
+    setMessages(prev => prev.concat(userMsg));
+
+    // Append bot loading state
+    const loadingId = Date.now() + 1;
+    setMessages(prev => prev.concat({ id: loadingId, sender: 'bot', isLoading: true }));
+
+    try {
+      const response = await apiClient.post('/ai/chatbot', { prompt: userText });
+      setMessages(prev => 
+        prev
+          .filter(m => m.id !== loadingId)
+          .concat({ id: Date.now(), sender: 'bot', text: response.data.response })
+      );
+    } catch (error) {
+      console.error("Error communicating with chatbot API", error);
+      setMessages(prev => 
+        prev
+          .filter(m => m.id !== loadingId)
+          .concat({ 
+            id: Date.now(), 
+            sender: 'bot', 
+            text: "Lo siento, experimenté una interrupción de conexión con la IA. Por favor, intenta de nuevo en unos momentos." 
+          })
+      );
+    }
   };
 
   return (
@@ -165,10 +201,9 @@ const Chatbot = () => {
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
-          {messages.map((msg, idx) => (
+          {messages.map((msg) => (
             <div key={msg.id} className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
               
-              {/* Loading Animation */}
               {msg.isLoading ? (
                 <div className="max-w-[85%] p-3 rounded-2xl rounded-tl-none bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.05)]">
                   <div className="generating-wrapper">
@@ -182,7 +217,6 @@ const Chatbot = () => {
                 </div>
               ) : (
                 <>
-                  {/* Message Bubble */}
                   <div 
                     className={`max-w-[85%] p-3 rounded-2xl whitespace-pre-wrap text-sm shadow-sm ${
                       msg.sender === 'user' 
@@ -193,7 +227,6 @@ const Chatbot = () => {
                     {msg.text}
                   </div>
 
-                  {/* Options */}
                   {msg.options && msg.options.length > 0 && (
                     <div className="mt-3 flex flex-col items-end gap-2 w-full animate-fade-in pr-2">
                       {msg.options.map((opt, oIdx) => (
@@ -214,6 +247,24 @@ const Chatbot = () => {
           ))}
           <div ref={messagesEndRef} />
         </div>
+
+        {/* Conversation Input Form */}
+        <form onSubmit={handleSendMessage} className="p-3 border-t border-[rgba(255,255,255,0.05)] bg-[var(--bg-primary)]/30 flex gap-2 items-center">
+          <input
+            type="text"
+            placeholder="Hazle una pregunta a EMAI..."
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            className="flex-1 bg-[rgba(0,0,0,0.3)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent-primary)] transition-all placeholder:text-[var(--text-muted)]"
+          />
+          <button 
+            type="submit"
+            disabled={!inputText.trim()}
+            className="p-2 bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-secondary)] text-white rounded-xl hover:shadow-[0_0_10px_rgba(59,130,246,0.4)] transition-all disabled:opacity-40 disabled:pointer-events-none"
+          >
+            <Send size={16} />
+          </button>
+        </form>
       </div>
 
       {/* Generating animation styles */}

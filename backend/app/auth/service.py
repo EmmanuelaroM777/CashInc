@@ -196,3 +196,62 @@ async def get_company_workers(admin_id: str) -> list:
         })
     return workers
 
+
+async def request_password_recovery(email: str) -> str:
+    """Generate a 6-digit code for password recovery and save to DB."""
+    db = get_database()
+    user = await db.users.find_one({"email": email})
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No se encontró ningún usuario con este correo electrónico",
+        )
+
+    code = "".join(random.choices(string.digits, k=6))
+    expire = datetime.now(timezone.utc) + timedelta(minutes=15)
+
+    await db.password_resets.update_one(
+        {"email": email},
+        {"$set": {"code": code, "expire": expire}},
+        upsert=True
+    )
+    
+    print(f"🔑 [RECOVERY CODE FOR {email}]: {code}")
+    return code
+
+
+async def reset_password_with_token(email: str, code: str, new_password: str) -> bool:
+    """Reset the user password if code is valid and not expired."""
+    db = get_database()
+    reset_entry = await db.password_resets.find_one({"email": email})
+    if not reset_entry:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se solicitó recuperación de contraseña para este correo electrónico",
+        )
+
+    if reset_entry["code"] != code:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Código de verificación incorrecto",
+        )
+
+    expire_time = reset_entry["expire"]
+    if expire_time.tzinfo is None:
+        expire_time = expire_time.replace(tzinfo=timezone.utc)
+
+    if datetime.now(timezone.utc) > expire_time:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El código de verificación ha expirado",
+        )
+
+    hashed_pwd = hash_password(new_password)
+    await db.users.update_one(
+        {"email": email},
+        {"$set": {"hashed_password": hashed_pwd, "updated_at": datetime.now(timezone.utc)}}
+    )
+
+    await db.password_resets.delete_one({"email": email})
+    return True
+

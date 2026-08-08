@@ -9,3 +9,6 @@ pydantic[email]
 openpyxl
 reportlab
 bcrypt==4.0.1
+pytest
+httpx
+requests

@@ -1,4 +1,5 @@
 import os
+from typing import Optional
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -12,6 +13,7 @@ class Settings:
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
         os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "480")
     )
+    GEMINI_API_KEY: Optional[str] = os.getenv("GEMINI_API_KEY", None)
 
 
 settings = Settings()

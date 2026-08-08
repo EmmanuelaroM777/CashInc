@@ -8,7 +8,8 @@ import {
   Bell, 
   LogOut,
   Settings,
-  Sparkles
+  Sparkles,
+  Wrench
 } from 'lucide-react';
 import { useContext } from 'react';
 import { AuthContext } from '../../context/AuthContext';
@@ -18,14 +19,25 @@ const Sidebar = ({ onClose }) => {
   const { user, logout } = useContext(AuthContext);
   const { t } = useContext(LanguageContext);
 
-  const navItems = [
+  const fullNavItems = [
     { name: t('sidebar.dashboard'), path: '/dashboard', icon: LayoutDashboard },
     { name: t('sidebar.assets'), path: '/assets', icon: Building2 },
+    { name: t('sidebar.maintenance') || 'Mantenimiento', path: '/maintenance', icon: Wrench },
     { name: t('sidebar.finances'), path: '/finances', icon: CircleDollarSign },
     { name: t('sidebar.reports'), path: '/reports', icon: BarChart3 },
     { name: t('sidebar.alerts'), path: '/alerts', icon: Bell },
     { name: t('sidebar.settings'), path: '/settings', icon: Settings },
   ];
+
+  const navItems = fullNavItems.filter(item => {
+    if (user?.role === 'mantenimiento') {
+      return item.path !== '/finances' && item.path !== '/reports';
+    }
+    if (user?.role === 'financiero') {
+      return item.path !== '/maintenance';
+    }
+    return true;
+  });
 
   return (
     <aside className="w-full flex flex-col h-full bg-[var(--bg-secondary)] border-r border-[var(--border-light)] z-40">
