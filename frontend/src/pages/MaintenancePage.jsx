@@ -242,11 +242,11 @@ const MaintenancePage = () => {
           onChange={(e) => setStatusFilter(e.target.value)}
           className="bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
         >
-          <option value="">{t('maintenance.allStatuses') || 'Todos los Estados'}</option>
-          <option value="pendiente">Pendiente</option>
-          <option value="en_progreso">En Progreso</option>
-          <option value="completado">Completado</option>
-          <option value="cancelado">Cancelado</option>
+          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allStatuses') || 'Todos los Estados'}</option>
+          <option value="pendiente" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Pendiente</option>
+          <option value="en_progreso" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">En Progreso</option>
+          <option value="completado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Completado</option>
+          <option value="cancelado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Cancelado</option>
         </select>
 
         <select
@@ -254,9 +254,9 @@ const MaintenancePage = () => {
           onChange={(e) => setTypeFilter(e.target.value)}
           className="bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
         >
-          <option value="">{t('maintenance.allTypes') || 'Todos los Tipos'}</option>
-          <option value="preventivo">Preventivo</option>
-          <option value="correctivo">Correctivo</option>
+          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allTypes') || 'Todos los Tipos'}</option>
+          <option value="preventivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Preventivo</option>
+          <option value="correctivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Correctivo</option>
         </select>
 
         <select
@@ -264,9 +264,9 @@ const MaintenancePage = () => {
           onChange={(e) => setSelectedAssetFilter(e.target.value)}
           className="bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
         >
-          <option value="">{t('maintenance.allAssets') || 'Todos los Activos'}</option>
+          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allAssets') || 'Todos los Activos'}</option>
           {assets.map(asset => (
-            <option key={asset.id} value={asset.id}>{asset.name}</option>
+            <option key={asset.id} value={asset.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{asset.name}</option>
           ))}
         </select>
       </div>
@@ -392,9 +392,9 @@ const MaintenancePage = () => {
               className="w-full bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
               required
             >
-              <option value="">Seleccione activo...</option>
+              <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Seleccione activo...</option>
               {assets.map(asset => (
-                <option key={asset.id} value={asset.id}>{asset.name} ({asset.type})</option>
+                <option key={asset.id} value={asset.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{asset.name} ({asset.type})</option>
               ))}
             </select>
           </div>
@@ -408,8 +408,8 @@ const MaintenancePage = () => {
               className="w-full bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
               required
             >
-              <option value="preventivo">Preventivo (Programado, rutina, cuidado)</option>
-              <option value="correctivo">Correctivo (Reparación de fallos, incidencias)</option>
+              <option value="preventivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Preventivo (Programado, rutina, cuidado)</option>
+              <option value="correctivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Correctivo (Reparación de fallos, incidencias)</option>
             </select>
           </div>
 
@@ -545,10 +545,10 @@ const MaintenancePage = () => {
               className="w-full bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
               required
             >
-              <option value="pendiente">Pendiente</option>
-              <option value="en_progreso">En Progreso</option>
-              <option value="completado">Completado (Registrará Gasto y ROI)</option>
-              <option value="cancelado">Cancelado</option>
+              <option value="pendiente" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Pendiente</option>
+              <option value="en_progreso" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">En Progreso</option>
+              <option value="completado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Completado (Registrará Gasto y ROI)</option>
+              <option value="cancelado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Cancelado</option>
             </select>
           </div>
 
