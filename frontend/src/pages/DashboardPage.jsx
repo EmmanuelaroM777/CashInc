@@ -14,7 +14,7 @@ import {
   Plus
 } from 'lucide-react';
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, 
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, 
   PieChart, Pie, Cell 
 } from 'recharts';
 import apiClient from '../api/client';
@@ -133,44 +133,49 @@ const DashboardPage = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Main Area Chart */}
+        {/* Main Line Chart */}
         <div className="lg:col-span-2 glass-panel p-6" style={{ backgroundColor: 'var(--card-bg)', borderColor: 'var(--card-border)' }}>
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
             <div>
               <h3 className="text-lg font-medium text-[var(--text-primary)]">{t('dashboard.financialFlow')}</h3>
               <p className="text-xs text-[var(--text-muted)]">{t('dashboard.monthlyExpVsInc')}</p>
             </div>
-            <div className="flex items-center gap-4 text-xs">
-              <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-[var(--accent-tertiary)] mr-2 shadow-[0_0_8px_var(--accent-tertiary)]"></span> {t('dashboard.expenses')}</div>
-              <div className="flex items-center"><span className="w-2 h-2 rounded-full bg-[var(--accent-secondary)] mr-2 shadow-[0_0_8px_var(--accent-secondary)]"></span> {t('dashboard.income')}</div>
+            <div className="flex flex-wrap items-center gap-4 text-xs">
+              <div className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-[#10b981] mr-1.5 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span> {t('finances.typeIncome') || 'Ingreso'}</div>
+              <div className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-[#3b82f6] mr-1.5 shadow-[0_0_8px_rgba(59,130,246,0.4)]"></span> {t('sidebar.maintenance') || 'Mantenimiento'}</div>
+              <div className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-[#8b5cf6] mr-1.5 shadow-[0_0_8px_rgba(139,92,246,0.4)]"></span> {t('finances.typeOperating') || 'Gasto Operativo'}</div>
+              <div className="flex items-center"><span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b] mr-1.5 shadow-[0_0_8px_rgba(245,158,11,0.4)]"></span> {t('finances.typeImprovement') || 'Mejora'}</div>
             </div>
           </div>
           
           <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={summary.monthly_expenses} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorGastos" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--accent-tertiary)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--accent-tertiary)" stopOpacity={0}/>
-                  </linearGradient>
-                  <linearGradient id="colorIngresos" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--accent-secondary)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--accent-secondary)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
+              <LineChart data={summary.monthly_expenses} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                <XAxis dataKey="month" stroke="var(--text-muted)" tick={{fill: 'var(--text-muted)', fontSize: 12}} axisLine={false} tickLine={false} />
-                <YAxis stroke="var(--text-muted)" tick={{fill: 'var(--text-muted)', fontSize: 12}} tickFormatter={(value) => `${value/1000}k`} axisLine={false} tickLine={false} />
+                <XAxis 
+                  dataKey="date" 
+                  stroke="var(--text-muted)" 
+                  tick={{fill: 'var(--text-muted)', fontSize: 10}} 
+                  axisLine={false} 
+                  tickLine={false}
+                  tickFormatter={(value) => {
+                    if (!value) return '';
+                    const parts = value.split('-');
+                    return parts.length === 3 ? `${parts[2]}/${parts[1]}` : value;
+                  }}
+                />
+                <YAxis stroke="var(--text-muted)" tick={{fill: 'var(--text-muted)', fontSize: 11}} tickFormatter={(value) => `$${value}`} axisLine={false} tickLine={false} />
                 <RechartsTooltip 
                   contentStyle={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-light)', borderRadius: '8px', color: 'var(--text-primary)' }}
-                  itemStyle={{ color: 'var(--text-primary)' }}
+                  itemStyle={{ color: 'var(--text-primary)', padding: '2px 0' }}
                   formatter={(value) => formatCurrency(value)}
-                  labelFormatter={(label) => `${t('dashboard.month')}: ${label}`}
+                  labelFormatter={(label) => `${t('dashboard.day') || 'Día'}: ${label}`}
                 />
-                <Area type="monotone" dataKey="expenses" name={t('dashboard.expenses')} stroke="var(--accent-tertiary)" strokeWidth={3} fillOpacity={1} fill="url(#colorGastos)" activeDot={{ r: 6, fill: "var(--accent-tertiary)", stroke: "white", strokeWidth: 2 }} />
-                <Area type="monotone" dataKey="income" name={t('dashboard.income')} stroke="var(--accent-secondary)" strokeWidth={3} fillOpacity={1} fill="url(#colorIngresos)" activeDot={{ r: 6, fill: "var(--accent-secondary)", stroke: "white", strokeWidth: 2 }} />
-              </AreaChart>
+                <Line type="monotone" dataKey="ingreso" name={t('finances.typeIncome') || 'Ingreso'} stroke="#10b981" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="mantenimiento" name={t('sidebar.maintenance') || 'Mantenimiento'} stroke="#3b82f6" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="operativo" name={t('finances.typeOperating') || 'Gasto Operativo'} stroke="#8b5cf6" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 6 }} />
+                <Line type="monotone" dataKey="mejora" name={t('finances.typeImprovement') || 'Mejora'} stroke="#f59e0b" strokeWidth={3} dot={{ r: 2 }} activeDot={{ r: 6 }} />
+              </LineChart>
             </ResponsiveContainer>
           </div>
         </div>

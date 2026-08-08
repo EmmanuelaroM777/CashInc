@@ -253,51 +253,38 @@ async def get_financial_summary(user_id: str) -> dict:
     async for doc in db.transactions.aggregate(income_pipeline):
         total_income = doc["total"]
 
-    # Monthly data (expenses + income, last 12 months)
-    monthly_exp_pipeline = [
-        {"$match": {"user_id": user_id, "type": {"$in": ["mantenimiento", "operativo", "mejora"]}}},
-        {
-            "$group": {
-                "_id": {
-                    "year": {"$year": "$date"},
-                    "month": {"$month": "$date"},
-                },
-                "total": {"$sum": "$amount"},
-            }
-        },
-        {"$sort": {"_id.year": 1, "_id.month": 1}},
-        {"$limit": 12},
-    ]
-    monthly_inc_pipeline = [
-        {"$match": {"user_id": user_id, "type": "ingreso"}},
-        {
-            "$group": {
-                "_id": {
-                    "year": {"$year": "$date"},
-                    "month": {"$month": "$date"},
-                },
-                "total": {"$sum": "$amount"},
-            }
-        },
-        {"$sort": {"_id.year": 1, "_id.month": 1}},
-        {"$limit": 12},
-    ]
+    # Daily data for the last 30 days (by transaction type)
+    from datetime import timedelta
+    daily_map = {}
+    now = datetime.now(timezone.utc)
+    for i in range(30, -1, -1):
+        day_date = now - timedelta(days=i)
+        day_str = day_date.strftime("%Y-%m-%d")
+        daily_map[day_str] = {
+            "date": day_str,
+            "ingreso": 0.0,
+            "mantenimiento": 0.0,
+            "operativo": 0.0,
+            "mejora": 0.0
+        }
 
-    # Collect expenses by month
-    monthly_map = {}
-    async for doc in db.transactions.aggregate(monthly_exp_pipeline):
-        key = (doc["_id"]["year"], doc["_id"]["month"])
-        monthly_map[key] = {"year": key[0], "month": key[1], "expenses": round(doc["total"], 2), "income": 0}
+    thirty_days_ago = now - timedelta(days=31)
+    tx_cursor = db.transactions.find({
+        "user_id": user_id,
+        "date": {"$gte": thirty_days_ago}
+    })
 
-    # Merge income by month
-    async for doc in db.transactions.aggregate(monthly_inc_pipeline):
-        key = (doc["_id"]["year"], doc["_id"]["month"])
-        if key in monthly_map:
-            monthly_map[key]["income"] = round(doc["total"], 2)
-        else:
-            monthly_map[key] = {"year": key[0], "month": key[1], "expenses": 0, "income": round(doc["total"], 2)}
+    async for tx in tx_cursor:
+        tx_date = tx["date"]
+        if tx_date.tzinfo is None:
+            tx_date = tx_date.replace(tzinfo=timezone.utc)
+        day_str = tx_date.strftime("%Y-%m-%d")
+        if day_str in daily_map:
+            tx_type = tx["type"]  # "ingreso", "mantenimiento", "operativo", "mejora"
+            if tx_type in daily_map[day_str]:
+                daily_map[day_str][tx_type] = round(daily_map[day_str][tx_type] + tx["amount"], 2)
 
-    monthly_expenses = [v for k, v in sorted(monthly_map.items())]
+    monthly_expenses = [v for k, v in sorted(daily_map.items())]
 
     # Expenses by category
     category_pipeline = [
