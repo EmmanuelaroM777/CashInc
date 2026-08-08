@@ -86,7 +86,6 @@ const MaintenancePage = () => {
       ]);
 
       let filteredMaints = maintRes.data.maintenances;
-      // Backend handles search and status, double verify type filter on frontend or modify query
       if (typeFilter) {
         filteredMaints = filteredMaints.filter(m => m.type === typeFilter);
       }
@@ -127,7 +126,6 @@ const MaintenancePage = () => {
       await apiClient.post('/maintenance', payload);
       setIsCreateModalOpen(false);
       fetchData();
-      // Reset form
       setFormData({
         asset_id: '',
         type: 'preventivo',
@@ -139,7 +137,7 @@ const MaintenancePage = () => {
       });
     } catch (error) {
       console.error("Error scheduling maintenance", error);
-      alert(error.response?.data?.detail || "Error al programar mantenimiento");
+      alert(error.response?.data?.detail || "Error");
     } finally {
       setIsSubmitting(false);
     }
@@ -175,7 +173,7 @@ const MaintenancePage = () => {
       fetchData();
     } catch (error) {
       console.error("Error updating maintenance", error);
-      alert(error.response?.data?.detail || "Error al actualizar mantenimiento");
+      alert(error.response?.data?.detail || "Error");
     } finally {
       setIsSubmitting(false);
     }
@@ -193,11 +191,18 @@ const MaintenancePage = () => {
       fetchData();
     } catch (error) {
       console.error("Error deleting maintenance", error);
-      alert(error.response?.data?.detail || "Error al eliminar mantenimiento");
+      alert(error.response?.data?.detail || "Error");
     }
   };
 
   const formatCurrency = (value) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
+
+  const statusLabels = {
+    pendiente: t('maintenance.statusPending'),
+    en_progreso: t('maintenance.statusInProgress'),
+    completado: t('maintenance.statusCompleted'),
+    cancelado: t('maintenance.statusCanceled')
+  };
 
   const statusBadges = {
     pendiente: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
@@ -212,15 +217,15 @@ const MaintenancePage = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-[var(--text-primary)]">
-            {t('sidebar.maintenance') || 'Cronograma de Mantenimiento'}
+            {t('sidebar.maintenance')}
           </h2>
           <p className="text-[var(--text-secondary)]">
-            {t('maintenance.subtitle') || 'Supervise, programe y resuelva trabajos preventivos y correctivos'}
+            {t('maintenance.subtitle')}
           </p>
         </div>
         <Button onClick={() => setIsCreateModalOpen(true)} className="flex items-center">
           <Plus size={18} className="mr-2" />
-          {t('maintenance.newJob') || 'Programar Tarea'}
+          {t('maintenance.newJob')}
         </Button>
       </div>
 
@@ -230,7 +235,7 @@ const MaintenancePage = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
           <input
             type="text"
-            placeholder={t('maintenance.searchPlaceholder') || 'Buscar por tarea o responsable...'}
+            placeholder={t('maintenance.searchPlaceholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10 pr-4 py-2 bg-[var(--input-bg)] border border-[var(--border-light)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)] transition-colors w-full"
@@ -242,11 +247,11 @@ const MaintenancePage = () => {
           onChange={(e) => setStatusFilter(e.target.value)}
           className="bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
         >
-          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allStatuses') || 'Todos los Estados'}</option>
-          <option value="pendiente" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Pendiente</option>
-          <option value="en_progreso" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">En Progreso</option>
-          <option value="completado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Completado</option>
-          <option value="cancelado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Cancelado</option>
+          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allStatuses')}</option>
+          <option value="pendiente" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.statusPending')}</option>
+          <option value="en_progreso" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.statusInProgress')}</option>
+          <option value="completado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.statusCompleted')}</option>
+          <option value="cancelado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.statusCanceled')}</option>
         </select>
 
         <select
@@ -254,9 +259,9 @@ const MaintenancePage = () => {
           onChange={(e) => setTypeFilter(e.target.value)}
           className="bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
         >
-          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allTypes') || 'Todos los Tipos'}</option>
-          <option value="preventivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Preventivo</option>
-          <option value="correctivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Correctivo</option>
+          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allTypes')}</option>
+          <option value="preventivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Preventive</option>
+          <option value="correctivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Corrective</option>
         </select>
 
         <select
@@ -264,7 +269,7 @@ const MaintenancePage = () => {
           onChange={(e) => setSelectedAssetFilter(e.target.value)}
           className="bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
         >
-          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allAssets') || 'Todos los Activos'}</option>
+          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allAssets')}</option>
           {assets.map(asset => (
             <option key={asset.id} value={asset.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{asset.name}</option>
           ))}
@@ -279,14 +284,14 @@ const MaintenancePage = () => {
           <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-[rgba(255,255,255,0.02)] text-[var(--text-secondary)] text-sm border-b border-[var(--border-light)]">
-                <th className="p-4 font-semibold">Activo</th>
-                <th className="p-4 font-semibold">Tarea</th>
-                <th className="p-4 font-semibold">Tipo</th>
-                <th className="p-4 font-semibold">Responsable</th>
-                <th className="p-4 font-semibold">Fecha Programada</th>
-                <th className="p-4 font-semibold">Estado</th>
-                <th className="p-4 font-semibold text-right">Costo Est. / Real</th>
-                <th className="p-4 font-semibold text-center">Acciones</th>
+                <th className="p-4 font-semibold">Asset</th>
+                <th className="p-4 font-semibold">Task</th>
+                <th className="p-4 font-semibold">Type</th>
+                <th className="p-4 font-semibold">Responsible</th>
+                <th className="p-4 font-semibold">Scheduled Date</th>
+                <th className="p-4 font-semibold">Status</th>
+                <th className="p-4 font-semibold text-right">Est. / Actual Cost</th>
+                <th className="p-4 font-semibold text-center">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[var(--border-light)] text-sm text-[var(--text-primary)]">
@@ -298,7 +303,7 @@ const MaintenancePage = () => {
                       <button 
                         onClick={() => navigate(`/assets/${m.asset_id}`)}
                         className="text-[var(--text-muted)] hover:text-[var(--accent-primary)] transition-colors"
-                        title="Ver detalle de activo"
+                        title="View Asset Details"
                       >
                         <ExternalLink size={14} />
                       </button>
@@ -306,11 +311,11 @@ const MaintenancePage = () => {
                   </td>
                   <td className="p-4 max-w-[200px] truncate">
                     <p className="font-semibold">{m.title}</p>
-                    <p className="text-xs text-[var(--text-muted)] truncate">{m.description || 'Sin descripción'}</p>
+                    <p className="text-xs text-[var(--text-muted)] truncate">{m.description || 'No description'}</p>
                   </td>
                   <td className="p-4 capitalize">
                     <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${m.type === 'preventivo' ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'}`}>
-                      {m.type}
+                      {m.type === 'preventivo' ? 'Preventive' : 'Corrective'}
                     </span>
                   </td>
                   <td className="p-4">
@@ -329,7 +334,7 @@ const MaintenancePage = () => {
                   </td>
                   <td className="p-4">
                     <span className={`px-2.5 py-1 rounded-full text-xs font-bold capitalize ${statusBadges[m.status]}`}>
-                      {m.status.replace('_', ' ')}
+                      {statusLabels[m.status]}
                     </span>
                   </td>
                   <td className="p-4 text-right font-medium">
@@ -344,7 +349,7 @@ const MaintenancePage = () => {
                       <button
                         onClick={() => handleUpdateClick(m)}
                         className="p-1.5 rounded-lg bg-[rgba(255,255,255,0.05)] text-[var(--text-secondary)] hover:text-white hover:bg-[rgba(255,255,255,0.1)] transition-all"
-                        title="Gestionar estado / costos"
+                        title="Manage Status & Costs"
                       >
                         <Edit3 size={15} />
                       </button>
@@ -352,7 +357,7 @@ const MaintenancePage = () => {
                         <button
                           onClick={() => handleDeleteClick(m)}
                           className="p-1.5 rounded-lg bg-[rgba(239,68,68,0.05)] text-[var(--status-danger)] hover:bg-[rgba(239,68,68,0.1)] transition-all"
-                          title="Eliminar tarea"
+                          title="Delete Task"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -367,11 +372,11 @@ const MaintenancePage = () => {
       ) : (
         <div className="glass-panel p-12 flex flex-col items-center justify-center text-center min-h-[350px]">
           <Wrench size={48} className="text-[var(--text-muted)] mb-4" />
-          <h3 className="text-xl font-medium text-[var(--text-primary)] mb-2">No se encontraron mantenimientos</h3>
+          <h3 className="text-xl font-medium text-[var(--text-primary)] mb-2">{t('maintenance.noAssetsFound') || 'No Maintenances Found'}</h3>
           <p className="text-[var(--text-secondary)] mb-6">
-            Comience a planificar cronogramas preventivos o documentar incidentes correctivos.
+            Start scheduling preventive tasks or documenting corrective logs.
           </p>
-          <Button onClick={() => setIsCreateModalOpen(true)}>Programar Primer Tarea</Button>
+          <Button onClick={() => setIsCreateModalOpen(true)}>Schedule First Task</Button>
         </div>
       )}
 
@@ -379,12 +384,12 @@ const MaintenancePage = () => {
       <Modal
         isOpen={isCreateModalOpen}
         onClose={() => !isSubmitting && setIsCreateModalOpen(false)}
-        title="Programar Trabajo de Mantenimiento"
+        title={t('maintenance.modalCreateTitle')}
         maxWidth="max-w-xl"
       >
         <form onSubmit={handleCreateSubmit} className="space-y-4">
           <div className="space-y-1.5 w-full">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">Activo a intervenir</label>
+            <label className="text-sm font-medium text-[var(--text-secondary)]">{t('maintenance.assetToIntervene')}</label>
             <select
               name="asset_id"
               value={formData.asset_id}
@@ -392,7 +397,7 @@ const MaintenancePage = () => {
               className="w-full bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
               required
             >
-              <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Seleccione activo...</option>
+              <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.selectAssetPlaceholder')}</option>
               {assets.map(asset => (
                 <option key={asset.id} value={asset.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{asset.name} ({asset.type})</option>
               ))}
@@ -400,7 +405,7 @@ const MaintenancePage = () => {
           </div>
 
           <div className="space-y-1.5 w-full">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">Tipo de Mantenimiento</label>
+            <label className="text-sm font-medium text-[var(--text-secondary)]">{t('maintenance.maintenanceType')}</label>
             <select
               name="type"
               value={formData.type}
@@ -408,23 +413,23 @@ const MaintenancePage = () => {
               className="w-full bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
               required
             >
-              <option value="preventivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Preventivo (Programado, rutina, cuidado)</option>
-              <option value="correctivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Correctivo (Reparación de fallos, incidencias)</option>
+              <option value="preventivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.preventiveOption')}</option>
+              <option value="correctivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.correctiveOption')}</option>
             </select>
           </div>
 
           <Input
-            label="Título de la tarea"
+            label={t('maintenance.taskTitleLabel')}
             name="title"
             value={formData.title}
             onChange={handleInputChange}
             required
-            placeholder="Ej. Cambio de bujías o Reparación de aire acondicionado"
+            placeholder={t('maintenance.taskTitlePlaceholder')}
           />
 
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Fecha Programada"
+              label={t('maintenance.scheduledDateLabel')}
               name="scheduled_date"
               type="date"
               value={formData.scheduled_date}
@@ -432,7 +437,7 @@ const MaintenancePage = () => {
               required
             />
             <Input
-              label="Costo Estimado ($)"
+              label={t('maintenance.estimatedCostLabel')}
               name="estimated_cost"
               type="number"
               step="0.01"
@@ -444,29 +449,29 @@ const MaintenancePage = () => {
           </div>
 
           <Input
-            label="Responsable del trabajo"
+            label={t('maintenance.responsibleLabel')}
             name="responsible"
             value={formData.responsible}
             onChange={handleInputChange}
             required
-            placeholder="Nombre de técnico o empresa externa"
+            placeholder={t('maintenance.responsiblePlaceholder')}
           />
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">Descripción del trabajo</label>
+            <label className="text-sm font-medium text-[var(--text-secondary)]">{t('maintenance.descriptionLabel')}</label>
             <textarea
               name="description"
               rows="3"
               value={formData.description}
               onChange={handleInputChange}
               className="w-full bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all resize-none"
-              placeholder="Detalle los materiales a utilizar o instrucciones de seguridad..."
+              placeholder={t('maintenance.descriptionPlaceholder')}
             ></textarea>
           </div>
 
           <div className="flex justify-end space-x-3 pt-4 border-t border-[var(--border-light)]">
-            <Button type="button" variant="ghost" onClick={() => setIsCreateModalOpen(false)}>Cancelar</Button>
-            <Button type="submit" isLoading={isSubmitting}>Programar Tarea</Button>
+            <Button type="button" variant="ghost" onClick={() => setIsCreateModalOpen(false)}>{t('assets.cancel')}</Button>
+            <Button type="submit" isLoading={isSubmitting}>{t('maintenance.newJob')}</Button>
           </div>
         </form>
       </Modal>
@@ -475,26 +480,25 @@ const MaintenancePage = () => {
       <Modal
         isOpen={isUpdateModalOpen}
         onClose={() => !isSubmitting && setIsUpdateModalOpen(false)}
-        title="Gestionar Tarea de Mantenimiento"
+        title={t('maintenance.modalUpdateTitle')}
         maxWidth="max-w-xl"
       >
         <form onSubmit={handleUpdateSubmit} className="space-y-4">
           <div className="p-3 bg-[rgba(255,255,255,0.02)] border border-[var(--border-light)] rounded-lg text-xs space-y-1 mb-2">
-            <p className="text-[var(--text-secondary)]">Activo: <span className="text-[var(--text-primary)] font-semibold">{selectedMaint?.asset_name}</span></p>
-            <p className="text-[var(--text-secondary)]">Tarea: <span className="text-[var(--text-primary)] font-semibold">{selectedMaint?.title}</span></p>
+            <p className="text-[var(--text-secondary)]">Asset: <span className="text-[var(--text-primary)] font-semibold">{selectedMaint?.asset_name}</span></p>
+            <p className="text-[var(--text-secondary)]">Task: <span className="text-[var(--text-primary)] font-semibold">{selectedMaint?.title}</span></p>
           </div>
 
-          {/* Permit updating standard fields in addition to status/notes */}
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Título"
+              label={t('maintenance.taskTitleLabel')}
               name="title"
               value={updateFormData.title}
               onChange={handleUpdateInputChange}
               required
             />
             <Input
-              label="Responsable"
+              label={t('maintenance.responsibleLabel')}
               name="responsible"
               value={updateFormData.responsible}
               onChange={handleUpdateInputChange}
@@ -504,7 +508,7 @@ const MaintenancePage = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <Input
-              label="Fecha Programada"
+              label={t('maintenance.scheduledDateLabel')}
               name="scheduled_date"
               type="date"
               value={updateFormData.scheduled_date}
@@ -512,7 +516,7 @@ const MaintenancePage = () => {
               required
             />
             <Input
-              label="Costo Estimado ($)"
+              label={t('maintenance.estimatedCostLabel')}
               name="estimated_cost"
               type="number"
               step="0.01"
@@ -524,7 +528,7 @@ const MaintenancePage = () => {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">Descripción</label>
+            <label className="text-sm font-medium text-[var(--text-secondary)]">{t('assets.description')}</label>
             <textarea
               name="description"
               rows="2"
@@ -537,7 +541,7 @@ const MaintenancePage = () => {
           <hr className="border-[var(--border-light)] my-2" />
 
           <div className="space-y-1.5 w-full">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">Estado de Ejecución</label>
+            <label className="text-sm font-medium text-[var(--text-secondary)]">{t('maintenance.executionStatus')}</label>
             <select
               name="status"
               value={updateFormData.status}
@@ -545,16 +549,16 @@ const MaintenancePage = () => {
               className="w-full bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
               required
             >
-              <option value="pendiente" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Pendiente</option>
-              <option value="en_progreso" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">En Progreso</option>
-              <option value="completado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Completado (Registrará Gasto y ROI)</option>
-              <option value="cancelado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Cancelado</option>
+              <option value="pendiente" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.statusPending')}</option>
+              <option value="en_progreso" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.statusInProgress')}</option>
+              <option value="completado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.statusCompleted')}</option>
+              <option value="cancelado" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.statusCanceled')}</option>
             </select>
           </div>
 
           {updateFormData.status === 'completado' && (
             <Input
-              label="Costo Real de Reparación ($)"
+              label={t('maintenance.actualCostLabel')}
               name="actual_cost"
               type="number"
               step="0.01"
@@ -562,25 +566,25 @@ const MaintenancePage = () => {
               value={updateFormData.actual_cost}
               onChange={handleUpdateInputChange}
               required
-              placeholder="Ingrese el monto pagado final"
+              placeholder={t('maintenance.actualCostPlaceholder')}
             />
           )}
 
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">Notas de Cierre / Reporte</label>
+            <label className="text-sm font-medium text-[var(--text-secondary)]">{t('maintenance.notesLabel')}</label>
             <textarea
               name="notes"
               rows="3"
               value={updateFormData.notes}
               onChange={handleUpdateInputChange}
               className="w-full bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all resize-none"
-              placeholder="Describa los hallazgos técnicos, refacciones cambiadas, o motivos de cancelación..."
+              placeholder={t('maintenance.notesPlaceholder')}
             ></textarea>
           </div>
 
           <div className="flex justify-end space-x-3 pt-4 border-t border-[var(--border-light)]">
-            <Button type="button" variant="ghost" onClick={() => setIsUpdateModalOpen(false)}>Cancelar</Button>
-            <Button type="submit" isLoading={isSubmitting}>Guardar Cambios</Button>
+            <Button type="button" variant="ghost" onClick={() => setIsUpdateModalOpen(false)}>{t('assets.cancel')}</Button>
+            <Button type="submit" isLoading={isSubmitting}>{t('settings.saveChanges')}</Button>
           </div>
         </form>
       </Modal>
@@ -597,22 +601,22 @@ const MaintenancePage = () => {
               <div className="w-14 h-14 rounded-full bg-[rgba(239,68,68,0.15)] flex items-center justify-center mb-4">
                 <Trash2 size={28} className="text-[var(--status-danger)]" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">¿Eliminar esta tarea?</h3>
+              <h3 className="text-lg font-bold text-white mb-2">{t('maintenance.deleteConfirmTitle')}</h3>
               <p className="text-sm text-[var(--text-secondary)] mb-6">
-                Esta acción no se puede deshacer. Se eliminarán los registros del cronograma.
+                {t('maintenance.deleteConfirmDesc')}
               </p>
               <div className="flex gap-3 w-full">
                 <button
                   onClick={() => setShowDeleteConfirm(false)}
                   className="flex-1 py-3 rounded-xl font-semibold text-white bg-[rgba(255,255,255,0.05)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.1)] transition-all"
                 >
-                  Cancelar
+                  {t('assets.cancel')}
                 </button>
                 <button
                   onClick={handleDeleteConfirm}
                   className="flex-1 py-3 rounded-xl font-semibold text-white bg-[var(--status-danger)] hover:brightness-110 transition-all shadow-[0_0_20px_rgba(239,68,68,0.3)]"
                 >
-                  Eliminar
+                  {t('settings.saveChanges') ? 'Confirm' : 'Confirmar'}
                 </button>
               </div>
             </div>

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import Modal from './Modal';
 import Input from './Input';
 import Button from './Button';
+import { LanguageContext } from '../../context/LanguageContext';
 import apiClient from '../../api/client';
 
 const TransactionModal = ({ isOpen, onClose, onSuccess }) => {
+  const { t } = useContext(LanguageContext);
   const [assets, setAssets] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -42,7 +44,7 @@ const TransactionModal = ({ isOpen, onClose, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.asset_id) {
-      alert("Debe seleccionar un activo");
+      alert(t('finances.alertSelectAsset'));
       return;
     }
 
@@ -70,7 +72,7 @@ const TransactionModal = ({ isOpen, onClose, onSuccess }) => {
       onClose();
     } catch (error) {
       console.error("Error creating transaction", error);
-      alert("Error al registrar transacción");
+      alert(t('finances.alertErrorRegister'));
     } finally {
       setIsSubmitting(false);
     }
@@ -80,11 +82,11 @@ const TransactionModal = ({ isOpen, onClose, onSuccess }) => {
     <Modal 
       isOpen={isOpen} 
       onClose={() => !isSubmitting && onClose()}
-      title="Registrar Gasto / Transacción"
+      title={t('finances.modalTitle')}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5 w-full">
-          <label className="text-sm font-medium text-[var(--text-secondary)]">Activo Relacionado</label>
+          <label className="text-sm font-medium text-[var(--text-secondary)]">{t('finances.relatedAsset')}</label>
           <select 
             name="asset_id" 
             value={formData.asset_id} 
@@ -96,14 +98,14 @@ const TransactionModal = ({ isOpen, onClose, onSuccess }) => {
               <option key={a.id} value={a.id} className="bg-[var(--bg-secondary)]">{a.name}</option>
             ))}
             {assets.length === 0 && (
-              <option value="" disabled className="bg-[var(--bg-secondary)]">No hay activos registrados</option>
+              <option value="" disabled className="bg-[var(--bg-secondary)]">{t('finances.noRegisteredAssets')}</option>
             )}
           </select>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5 w-full">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">Tipo</label>
+            <label className="text-sm font-medium text-[var(--text-secondary)]">{t('finances.typeLabel')}</label>
             <select 
               name="type" 
               value={formData.type} 
@@ -111,14 +113,14 @@ const TransactionModal = ({ isOpen, onClose, onSuccess }) => {
               required 
               className="w-full bg-[rgba(0,0,0,0.2)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all"
             >
-              <option value="operativo" className="bg-[var(--bg-secondary)]">Gasto Operativo</option>
-              <option value="mantenimiento" className="bg-[var(--bg-secondary)]">Gasto Mantenimiento</option>
-              <option value="mejora" className="bg-[var(--bg-secondary)]">Mejora/Inversión</option>
-              <option value="ingreso" className="bg-[var(--bg-secondary)]">Ingreso (+)</option>
+              <option value="operativo" className="bg-[var(--bg-secondary)]">{t('finances.typeOperating')}</option>
+              <option value="mantenimiento" className="bg-[var(--bg-secondary)]">{t('finances.typeMaintenance')}</option>
+              <option value="mejora" className="bg-[var(--bg-secondary)]">{t('finances.typeImprovement')}</option>
+              <option value="ingreso" className="bg-[var(--bg-secondary)]">{t('finances.typeIncome')}</option>
             </select>
           </div>
           <Input 
-            label="Monto ($)" 
+            label={t('finances.amountLabel')} 
             name="amount" 
             type="number" 
             step="0.01" 
@@ -130,7 +132,7 @@ const TransactionModal = ({ isOpen, onClose, onSuccess }) => {
         </div>
 
         <Input 
-          label="Fecha" 
+          label={t('finances.dateLabel')} 
           name="date" 
           type="date" 
           value={formData.date} 
@@ -138,22 +140,22 @@ const TransactionModal = ({ isOpen, onClose, onSuccess }) => {
           required 
         />
         <Input 
-          label="Categoría (Opcional)" 
+          label={t('finances.categoryOptional')} 
           name="category" 
           value={formData.category} 
           onChange={handleInputChange} 
-          placeholder="Ej. Electricidad, Pintura..." 
+          placeholder={t('finances.categoryPlaceholder')} 
         />
         <Input 
-          label="Descripción (Opcional)" 
+          label={t('finances.descriptionOptional')} 
           name="description" 
           value={formData.description} 
           onChange={handleInputChange} 
         />
 
         <div className="flex justify-end space-x-3 pt-4 mt-4 border-t border-[var(--border-light)]">
-          <Button type="button" variant="ghost" onClick={() => onClose()}>Cancelar</Button>
-          <Button type="submit" isLoading={isSubmitting}>Registrar</Button>
+          <Button type="button" variant="ghost" onClick={() => onClose()}>{t('finances.cancelBtn')}</Button>
+          <Button type="submit" isLoading={isSubmitting}>{t('finances.registerBtn')}</Button>
         </div>
       </form>
     </Modal>

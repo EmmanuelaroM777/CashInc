@@ -51,14 +51,12 @@ const FinancePage = () => {
   });
 
   const handleSimulateClicks = () => {
-    // Generate a random click session simulation
     setMonetization(prev => {
       const addedClicks = Math.floor(Math.random() * 15) + 3;
       const addedImpressions = addedClicks * Math.floor(Math.random() * 80 + 40);
       const newClicks = prev.clicks + addedClicks;
       const newImpressions = prev.impressions + addedImpressions;
       const newCtr = parseFloat(((newClicks / newImpressions) * 100).toFixed(2));
-      // Earnings = (Impressions / 1000) * CPM + Clicks * 0.15 (simulating PPC + CPM)
       const newEarnings = parseFloat(((newImpressions / 1000) * prev.cpm + newClicks * 0.15).toFixed(2));
       
       return {
@@ -80,7 +78,6 @@ const FinancePage = () => {
       queryParams.append('skip', pagination.skip.toString());
       queryParams.append('limit', pagination.limit.toString());
 
-      // Fetch both transactions and assets
       const [txRes, assetsRes] = await Promise.all([
         apiClient.get(`/finances/transactions?${queryParams.toString()}`),
         apiClient.get('/assets')
@@ -89,8 +86,6 @@ const FinancePage = () => {
       setTransactions(txRes.data);
       setAssets(assetsRes.data.assets);
       
-      // Assume a count of transactions (or dynamically count based on returned elements for simulation/pagination)
-      // Since backend list endpoint doesn't return count directly, we estimate page availability
       setPagination(prev => ({ 
         ...prev, 
         total: txRes.data.length < prev.limit ? prev.skip + txRes.data.length : prev.skip + prev.limit + 1 
@@ -111,7 +106,7 @@ const FinancePage = () => {
       setViabilityResult(response.data);
     } catch (error) {
       console.error("Error evaluating viability", error);
-      alert("Error al calcular viabilidad.");
+      alert("Error calculating viability.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -136,6 +131,14 @@ const FinancePage = () => {
   const formatCurrency = (value) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
 
   const currentPage = Math.floor(pagination.skip / pagination.limit) + 1;
+
+  const getTranslatedType = (type) => {
+    if (type === 'ingreso') return t('finances.typeIncome');
+    if (type === 'mantenimiento') return t('sidebar.maintenance');
+    if (type === 'operativo') return t('finances.typeOperating');
+    if (type === 'mejora') return t('finances.typeImprovement');
+    return type;
+  };
 
   return (
     <div className="space-y-6">
@@ -171,7 +174,7 @@ const FinancePage = () => {
                   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={14} />
                   <input
                     type="text"
-                    placeholder="Filtrar por descripción..."
+                    placeholder={t('finances.filterPlaceholder')}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     className="pl-8 pr-3 py-1.5 bg-[var(--input-bg)] border border-[var(--border-light)] rounded-lg text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-primary)] transition-colors w-full"
@@ -183,11 +186,11 @@ const FinancePage = () => {
                   onChange={(e) => setTypeFilter(e.target.value)}
                   className="bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[var(--accent-primary)] transition-all w-full"
                 >
-                  <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Todos los Tipos</option>
-                  <option value="ingreso" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Ingreso</option>
-                  <option value="mantenimiento" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Mantenimiento</option>
-                  <option value="operativo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Gasto Operativo</option>
-                  <option value="mejora" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Mejora</option>
+                  <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allTypes')}</option>
+                  <option value="ingreso" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('finances.typeIncome')}</option>
+                  <option value="mantenimiento" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('sidebar.maintenance')}</option>
+                  <option value="operativo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('finances.typeOperating')}</option>
+                  <option value="mejora" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('finances.typeImprovement')}</option>
                 </select>
               </div>
             </div>
@@ -198,59 +201,63 @@ const FinancePage = () => {
                 <Loader />
               ) : transactions.length > 0 ? (
                 <div className="space-y-2">
-                  {transactions.map(tx => (
-                    <div key={tx.id} className="p-4 rounded-xl bg-[var(--input-bg)] border border-[var(--border-light)] flex items-center justify-between hover:bg-[rgba(255,255,255,0.03)] transition-all">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'ingreso' ? 'bg-[var(--status-success)] text-white' : 'bg-[var(--status-danger)] text-white'} bg-opacity-20`}>
-                          {tx.type === 'ingreso' ? <DollarSign size={20} className="text-[var(--status-success)]"/> : <TrendingDown size={20} className="text-[var(--status-danger)]"/>}
+                  {transactions.map((tx) => (
+                    <div 
+                      key={tx.id} 
+                      className="p-3.5 rounded-xl border border-[var(--border-light)] bg-[rgba(255,255,255,0.01)] hover:bg-[rgba(255,255,255,0.02)] transition-colors flex items-center justify-between gap-4 text-xs"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                          tx.type === 'ingreso' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                        }`}>
+                          {tx.type === 'ingreso' ? '+' : '-'}
                         </div>
-                        <div>
-                          <p className="font-semibold text-[var(--text-primary)] text-sm">{tx.description || tx.type}</p>
-                          <div className="flex items-center gap-2 text-[10px] text-[var(--text-secondary)] mt-1">
-                            <span className="capitalize text-white bg-[rgba(255,255,255,0.05)] px-1.5 py-0.5 rounded">{tx.asset_name}</span>
-                            <span>•</span>
-                            <span>{new Date(tx.date).toLocaleDateString()}</span>
-                            {tx.category && (
-                              <>
-                                <span>•</span>
-                                <span className="bg-[var(--accent-primary)] bg-opacity-10 text-[var(--accent-primary)] px-2 py-0.5 rounded font-medium">{tx.category.replace('_', ' ')}</span>
-                              </>
-                            )}
-                          </div>
+                        <div className="space-y-0.5 max-w-[250px] sm:max-w-[400px]">
+                          <p className="font-semibold text-white truncate">{tx.description}</p>
+                          <p className="text-[10px] text-[var(--text-muted)] flex items-center gap-2">
+                            <span>{tx.asset_name}</span>
+                            <span className="w-1 h-1 rounded-full bg-[var(--text-muted)]" />
+                            <span className="capitalize">{getTranslatedType(tx.type)}</span>
+                          </p>
                         </div>
                       </div>
-                      <div className={`font-bold text-sm ${tx.type === 'ingreso' ? 'text-[var(--status-success)]' : 'text-[var(--status-danger)]'}`}>
-                        {tx.type === 'ingreso' ? '+' : '-'}{formatCurrency(tx.amount)}
+                      <div className="text-right space-y-0.5">
+                        <p className={`font-mono font-bold text-sm ${
+                          tx.type === 'ingreso' ? 'text-[var(--status-success)]' : 'text-[var(--status-danger)]'
+                        }`}>
+                          {tx.type === 'ingreso' ? '+' : '-'}{formatCurrency(tx.amount)}
+                        </p>
+                        <p className="text-[9px] text-[var(--text-muted)]">{new Date(tx.date).toLocaleDateString()}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-[var(--text-muted)] text-sm">
-                  <RefreshCw size={48} className="mb-4 opacity-30" />
+                <div className="h-full flex flex-col items-center justify-center text-center p-8 text-[var(--text-muted)]">
+                  <TrendingDown size={36} className="mb-2 opacity-50" />
                   <p>{t('finances.noTransactions')}</p>
                 </div>
               )}
             </div>
 
-            {/* Pagination footer */}
-            {!loading && (pagination.skip > 0 || transactions.length === pagination.limit) && (
-              <div className="p-4 border-t border-[var(--border-light)] flex justify-between items-center text-xs text-[var(--text-secondary)] bg-[rgba(0,0,0,0.1)]">
-                <span>Página {currentPage}</span>
+            {/* Pagination Controls */}
+            {!loading && transactions.length > 0 && (
+              <div className="p-4 border-t border-[var(--border-light)] flex items-center justify-between text-xs text-[var(--text-secondary)]">
+                <span>Pág. {currentPage}</span>
                 <div className="flex gap-2">
                   <button
                     disabled={pagination.skip === 0}
                     onClick={() => handlePageChange('prev')}
                     className="p-1 px-3 rounded bg-[rgba(255,255,255,0.05)] border border-[var(--border-light)] text-white hover:bg-[rgba(255,255,255,0.1)] disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1"
                   >
-                    <ArrowLeft size={12} /> Anterior
+                    <ArrowLeft size={12} /> {t('finances.prev')}
                   </button>
                   <button
                     disabled={transactions.length < pagination.limit}
                     onClick={() => handlePageChange('next')}
                     className="p-1 px-3 rounded bg-[rgba(255,255,255,0.05)] border border-[var(--border-light)] text-white hover:bg-[rgba(255,255,255,0.1)] disabled:opacity-30 disabled:pointer-events-none transition-all flex items-center gap-1"
                   >
-                    Siguiente <ArrowRight size={12} />
+                    {t('finances.next')} <ArrowRight size={12} />
                   </button>
                 </div>
               </div>
@@ -297,25 +304,25 @@ const FinancePage = () => {
               {/* Viability Results Output */}
               {viabilityResult && (
                 <div className="p-4 rounded-xl bg-[rgba(255,255,255,0.02)] border border-[var(--border-light)] text-xs space-y-2.5 animate-fade-in">
-                  <h4 className="font-bold text-white uppercase tracking-wider text-[10px]">Evaluación Financiera</h4>
+                  <h4 className="font-bold text-white uppercase tracking-wider text-[10px]">{t('finances.evaluation')}</h4>
                   <div className="flex justify-between">
-                    <span className="text-[var(--text-secondary)]">VAN (Valor Actual Neto):</span>
+                    <span className="text-[var(--text-secondary)]">{t('finances.npvLabel')}</span>
                     <span className={`font-bold ${viabilityResult.net_present_value >= 0 ? 'text-[var(--status-success)]' : 'text-[var(--status-danger)]'}`}>
                       {formatCurrency(viabilityResult.net_present_value)}
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[var(--text-secondary)]">Retorno (Payback):</span>
-                    <span className="font-semibold text-white">{viabilityResult.payback_period_months.toFixed(1)} meses</span>
+                    <span className="text-[var(--text-secondary)]">{t('finances.paybackLabel')}</span>
+                    <span className="font-semibold text-white">{viabilityResult.payback_period_months.toFixed(1)} {t('finances.months')}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[var(--text-secondary)]">Flujo Mensual:</span>
+                    <span className="text-[var(--text-secondary)]">{t('finances.monthlyCashFlowLabel')}</span>
                     <span className="font-semibold text-white">{formatCurrency(viabilityResult.monthly_cash_flow)}</span>
                   </div>
                   <div className="flex justify-between border-t border-[var(--border-light)] pt-2 items-center">
-                    <span className="text-[var(--text-secondary)]">Dictamen:</span>
+                    <span className="text-[var(--text-secondary)]">{t('finances.rulingLabel')}</span>
                     <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${viabilityResult.is_viable ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'}`}>
-                      {viabilityResult.is_viable ? 'Viable' : 'No Viable'}
+                      {viabilityResult.is_viable ? t('finances.viable') : t('finances.notViable')}
                     </span>
                   </div>
                   <p className="text-[10px] text-[var(--text-muted)] italic leading-relaxed pt-1">{viabilityResult.recommendation}</p>
@@ -328,39 +335,39 @@ const FinancePage = () => {
           <div className="glass-panel p-6">
             <h3 className="text-lg font-medium text-[var(--text-primary)] mb-3 flex items-center">
               <Coins className="mr-2 text-amber-400" size={18} />
-              Monetización (Simulado)
+              {t('finances.monetizationTitle')}
             </h3>
             <p className="text-xs text-[var(--text-secondary)] mb-4 leading-relaxed">
-              Módulo complementario para simular ingresos por publicidad insertada en los paneles del sistema.
+              {t('finances.monetizationDesc')}
             </p>
             
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="p-3 bg-[rgba(255,255,255,0.02)] border border-[var(--border-light)] rounded-xl">
-                  <p className="text-[var(--text-muted)] text-[10px] mb-0.5">Impresiones</p>
+                  <p className="text-[var(--text-muted)] text-[10px] mb-0.5">{t('finances.impressions')}</p>
                   <p className="font-bold text-white text-sm">{monetization.impressions.toLocaleString()}</p>
                 </div>
                 <div className="p-3 bg-[rgba(255,255,255,0.02)] border border-[var(--border-light)] rounded-xl">
-                  <p className="text-[var(--text-muted)] text-[10px] mb-0.5">Clics Totales</p>
+                  <p className="text-[var(--text-muted)] text-[10px] mb-0.5">{t('finances.totalClicks')}</p>
                   <p className="font-bold text-white text-sm">{monetization.clicks.toLocaleString()}</p>
                 </div>
                 <div className="p-3 bg-[rgba(255,255,255,0.02)] border border-[var(--border-light)] rounded-xl">
-                  <p className="text-[var(--text-muted)] text-[10px] mb-0.5">CTR Promedio</p>
+                  <p className="text-[var(--text-muted)] text-[10px] mb-0.5">{t('finances.avgCtr')}</p>
                   <p className="font-bold text-cyan-400 text-sm">{monetization.ctr}%</p>
                 </div>
                 <div className="p-3 bg-[rgba(255,255,255,0.02)] border border-[var(--border-light)] rounded-xl">
-                  <p className="text-[var(--text-muted)] text-[10px] mb-0.5">CPM Fijo</p>
+                  <p className="text-[var(--text-muted)] text-[10px] mb-0.5">{t('finances.fixedCpm')}</p>
                   <p className="font-bold text-emerald-400 text-sm">${monetization.cpm.toFixed(2)}</p>
                 </div>
               </div>
 
               {/* Earnings Panel */}
               <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-center flex flex-col justify-center items-center shadow-inner">
-                <p className="text-[var(--text-secondary)] text-xs mb-1">Ingresos Estimados por Anuncios</p>
+                <p className="text-[var(--text-secondary)] text-xs mb-1">{t('finances.estAdEarnings')}</p>
                 <p className="text-2xl font-black text-amber-400 font-mono tracking-tight">
                   {formatCurrency(monetization.earnings)}
                 </p>
-                <span className="text-[8px] text-[var(--text-muted)] uppercase tracking-widest mt-1">Simulación Activa</span>
+                <span className="text-[8px] text-[var(--text-muted)] uppercase tracking-widest mt-1">{t('finances.activeSimulation')}</span>
               </div>
 
               <button
@@ -368,7 +375,7 @@ const FinancePage = () => {
                 className="w-full flex items-center justify-center gap-1.5 text-xs py-2 px-4 rounded-xl bg-[rgba(255,255,255,0.05)] border border-[var(--border-light)] text-white hover:bg-[rgba(255,255,255,0.1)] hover:border-amber-500/30 transition-all font-semibold"
               >
                 <MousePointerClick size={14} className="text-amber-400" />
-                Simular Clics y Tráfico
+                {t('finances.simulateBtn')}
               </button>
             </div>
           </div>
