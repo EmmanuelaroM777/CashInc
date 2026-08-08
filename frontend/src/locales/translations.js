@@ -13,7 +13,7 @@ export const translations = {
       logout: "Cerrar Sesión"
     },
     header: {
-      searchPlaceholder: "Buscar pacientes, citas...", // Mantenemos tu UI anterior, pero podríamos cambiarlo a 'Buscar activos...'
+      searchPlaceholder: "Buscar activos, finanzas...",
       admin: "Administrador",
       newAlerts: "Nuevas",
       titleDashboard: "Resumen General",
