@@ -183,11 +183,11 @@ const FinancePage = () => {
                   onChange={(e) => setTypeFilter(e.target.value)}
                   className="bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-[var(--accent-primary)] transition-all w-full"
                 >
-                  <option value="">Todos los Tipos</option>
-                  <option value="ingreso">Ingreso</option>
-                  <option value="mantenimiento">Mantenimiento</option>
-                  <option value="operativo">Gasto Operativo</option>
-                  <option value="mejora">Mejora</option>
+                  <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Todos los Tipos</option>
+                  <option value="ingreso" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Ingreso</option>
+                  <option value="mantenimiento" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Mantenimiento</option>
+                  <option value="operativo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Gasto Operativo</option>
+                  <option value="mejora" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">Mejora</option>
                 </select>
               </div>
             </div>
@@ -280,8 +280,8 @@ const FinancePage = () => {
                 }}
                 className="w-full bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--accent-primary)] transition-all"
               >
-                <option value="">{t('finances.selectAsset')}</option>
-                {assets.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('finances.selectAsset')}</option>
+                {assets.map(a => <option key={a.id} value={a.id} className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{a.name}</option>)}
               </select>
               <Button 
                 fullWidth 
