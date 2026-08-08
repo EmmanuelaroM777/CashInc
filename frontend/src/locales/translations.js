@@ -278,6 +278,14 @@ export const translations = {
       inAsset: "en",
       allClear: "Todo en orden",
       noAlerts: "No tiene alertas activas en este momento."
+    },
+    maintenance: {
+      subtitle: "Supervise, programe y resuelva trabajos preventivos y correctivos",
+      newJob: "Programar Tarea",
+      searchPlaceholder: "Buscar por tarea o responsable...",
+      allStatuses: "Todos los Estados",
+      allTypes: "Todos los Tipos",
+      allAssets: "Todos los Activos"
     }
   },
   en: {
@@ -559,6 +567,14 @@ export const translations = {
       inAsset: "in",
       allClear: "All clear",
       noAlerts: "You have no active alerts at this time."
+    },
+    maintenance: {
+      subtitle: "Supervise, schedule, and resolve preventive and corrective works",
+      newJob: "Schedule Task",
+      searchPlaceholder: "Search by task or responsible...",
+      allStatuses: "All Statuses",
+      allTypes: "All Types",
+      allAssets: "All Assets"
     }
   }
 };

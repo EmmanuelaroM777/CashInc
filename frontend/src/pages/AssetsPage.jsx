@@ -226,13 +226,13 @@ const AssetsPage = () => {
           onChange={(e) => setTypeFilter(e.target.value)}
           className="bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all w-full"
         >
-          <option value="">{t('maintenance.allTypes') || 'Todos los Tipos'}</option>
-          <option value="edificio">{t('assets.typeBuilding')}</option>
-          <option value="instalacion">{t('assets.typeInstallation')}</option>
-          <option value="maquinaria">{t('assets.typeMachinery')}</option>
-          <option value="equipo">{t('assets.typeEquipment')}</option>
-          <option value="proyecto">{t('assets.typeProject')}</option>
-          <option value="sucursal">{t('assets.typeBranch')}</option>
+          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allTypes') || 'Todos los Tipos'}</option>
+          <option value="edificio" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('assets.typeBuilding')}</option>
+          <option value="instalacion" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('assets.typeInstallation')}</option>
+          <option value="maquinaria" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('assets.typeMachinery')}</option>
+          <option value="equipo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('assets.typeEquipment')}</option>
+          <option value="proyecto" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('assets.typeProject')}</option>
+          <option value="sucursal" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('assets.typeBranch')}</option>
         </select>
 
         <select
@@ -240,10 +240,10 @@ const AssetsPage = () => {
           onChange={(e) => setStatusFilter(e.target.value)}
           className="bg-[var(--input-bg)] border border-[var(--border-light)] text-[var(--text-primary)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--accent-primary)] transition-all w-full"
         >
-          <option value="">{t('maintenance.allStatuses') || 'Todos los Estados'}</option>
-          <option value="activo">{t('assets.statusActive')}</option>
-          <option value="en_mantenimiento">{t('assets.statusMaintenance')}</option>
-          <option value="inactivo">{t('assets.statusInactive')}</option>
+          <option value="" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('maintenance.allStatuses') || 'Todos los Estados'}</option>
+          <option value="activo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('assets.statusActive')}</option>
+          <option value="en_mantenimiento" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('assets.statusMaintenance')}</option>
+          <option value="inactivo" className="bg-[var(--bg-secondary)] text-[var(--text-primary)]">{t('assets.statusInactive')}</option>
         </select>
       </div>
 
