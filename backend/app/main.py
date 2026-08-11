@@ -30,7 +30,10 @@ app = FastAPI(
 # CORS — Allow frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Wildcard or Vercel URLs will be configured here
+    allow_origins=[
+        "http://localhost:5173",
+        "https://cash-inc.vercel.app",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
