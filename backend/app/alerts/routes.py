@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from app.auth.service import get_current_user, require_admin
-from app.alerts.service import get_alerts, dismiss_alert, get_alert_count, run_all_alert_checks
+from app.alerts.service import get_alerts, dismiss_alert, get_alert_count, run_all_alert_checks, generate_depreciation_alerts
 
 router = APIRouter()
 
