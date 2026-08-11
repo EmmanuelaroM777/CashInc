@@ -13,7 +13,8 @@ import {
   AlertCircle, 
   CheckCircle2, 
   Clock,
-  Sparkles
+  Sparkles,
+  User
 } from 'lucide-react';
 import { 
   LineChart, 
